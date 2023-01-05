@@ -49,8 +49,9 @@
                 </div>
             </div>
         </div>
-        <div id="room">
+        <main id="base">
             <div id="toolbar">
+                <p id="roomname">Loading...</p>
                 <svg id="togglemembers" class="icon" x="0" y="0" role="img" width="24" height="24" viewBox="0 0 24 24">
                   <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M14 8.00598C14 10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 15.473 18 19.006V20.006H2V19.006Z">
@@ -63,20 +64,22 @@
                     </path>
                 </svg>
             </div>
-            <button id="loadprev">Load previous messages</button>
-            <div id="messages"></div>
-            <div id="messagebox">
-                <div id="files"></div>
-                <hr>
-                <div class="textarea">
-                  <div role="textbox" id="messageinput" aria-placeholder="Type your message here"
-                        aria-label="Input box for your message" contenteditable="true"></div>
-                    <svg id="uploadfile" class="icon" alt="File upload button" xmlns="http://www.w3.org/2000/svg" view
-Box="0 0 24 24"><path d="M14,2L20,8V20C20,21.1 19.1,22 18,22H6C4.9,22 4,21.1 4,20V4C4,2.9 4.9,2 6,2H14M18,20V9H13V4H6V20H18M12,12L16,16H13.5V19H10.5V16H8L12,12Z" /></svg>
-                    <svg id="sendmessage" class="icon" alt="Message send button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3,20V4L22,12M5,17L16.85,12L5,7V10.5L11,12L5,13.5M5,17V7Z" /></svg>
+            <div id="room">
+                <button id="loadprev">Load previous messages</button>
+                <div id="messages"></div>
+                <div id="messagebox">
+                    <div id="files"></div>
+                    <hr>
+                    <div class="textarea">
+                      <div role="textbox" id="messageinput" aria-placeholder="Type your message here"
+                            aria-label="Input box for your message" contenteditable="true"></div>
+                        <svg id="uploadfile" class="icon" alt="File upload button" xmlns="http://www.w3.org/2000/svg" view
+    Box="0 0 24 24"><path d="M14,2L20,8V20C20,21.1 19.1,22 18,22H6C4.9,22 4,21.1 4,20V4C4,2.9 4.9,2 6,2H14M18,20V9H13V4H6V20H18M12,12L16,16H13.5V19H10.5V16H8L12,12Z" /></svg>
+                        <svg id="sendmessage" class="icon" alt="Message send button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3,20V4L22,12M5,17L16.85,12L5,7V10.5L11,12L5,13.5M5,17V7Z" /></svg>
+                    </div>
                 </div>
             </div>
-        </div>
+        </main>
         <div id="members" style="display: none;">
             <p>Online</p>
             <div id="members.online"></div>

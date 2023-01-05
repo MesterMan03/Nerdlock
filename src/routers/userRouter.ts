@@ -202,10 +202,10 @@ router.post("/login", verifyReq(loginSchema), async (req, res) => {
         await user.save();
     }
 
+    res.json(await sanitizeUser(user));
+    
     user.usedOneTimeKeys = user.secretMessages = user.secretRequests = [];
     await user.save();
-
-    res.json(await sanitizeUser(user));
 });
 
 const registerSchema = yup.object({
