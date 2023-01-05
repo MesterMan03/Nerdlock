@@ -1,0 +1,20 @@
+{
+    "short_name": "Nerdlock",
+    "name": "Nerdlock by Mester",
+    "description": "Nerdlock is a simple E2EE messaging app designed to be secure and private",
+    "icons": [
+        {
+            "src": "/img/icon-512.png",
+            "type": "image/png",
+            "sizes": "512x512"
+        },
+        {
+            "src": "/img/icon-192.png",
+            "type": "image/png",
+            "sizes": "192x192"
+        }
+    ],
+    "start_url": "/nerdlock.html",
+    "background_color": "#4f4f4f",
+    "display": "standalone"
+}

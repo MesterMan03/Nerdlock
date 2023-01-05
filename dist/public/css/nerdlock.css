@@ -1,0 +1,538 @@
+/* I'm not good at CSS, but at least I'm aware of that */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+
+    overflow-y: hidden;
+}
+
+p {
+    margin: 0;
+    color: white;
+    font-size: 1rem;
+}
+
+body {
+    display: flex;
+    flex-direction: row;
+    background-color: #5a5a5a;
+
+    overflow-y: hidden;
+}
+
+#navigator {
+    width: 60px;
+    padding: 5px;
+
+    background-color: #333;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+
+    gap: 3px;
+}
+
+#navigator>hr {
+    width: 80%;
+    height: 5px;
+
+    margin: 0;
+
+    border-radius: 5px;
+
+    background-color: white;
+}
+
+#navigator button,
+#navigator>img {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+
+    padding: 0;
+    border: 0;
+    border-radius: 25px;
+
+    color: white;
+    font-size: 20px;
+
+    cursor: pointer;
+
+    transition: border-radius 0.3s ease-out, background-color 0.3s ease-out;
+}
+
+#navigator button:hover,
+#navigator>img:hover {
+    border-radius: 10px;
+}
+
+#navigator button {
+    background-color: #444;
+}
+
+#navigator button:hover {
+    background-color: #606060;
+}
+
+#createroom {
+    /* Hurray, !important */
+    font-size: 35px !important;
+}
+
+#rooms {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+#authform {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+#authform>input,
+#authform>select {
+    border-radius: 5px;
+    outline: none;
+    border: none;
+
+    padding: 3px;
+
+    background-color: #777;
+
+    color: white;
+}
+
+#authform>input::placeholder {
+    color: #d0d0d0;
+}
+
+#usercontainer {
+    width: 100%;
+    height: 100%;
+
+    position: absolute;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(4px);
+}
+
+#user {
+    width: fit-content;
+    border-radius: 1em;
+    background-color: #404040;
+
+    padding: 10px;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    position: relative;
+}
+
+#user>h2 {
+    color: #eee;
+    margin: 5px;
+}
+
+#user>button {
+    position: absolute;
+    right: 10px;
+    top: 10px;
+
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+
+    cursor: pointer;
+
+    color: #eee;
+}
+
+#userinfo {
+    flex-direction: column;
+    width: 100%;
+}
+
+.usersetting {
+    border-top: 2px #666 solid;
+    margin-top: 5px;
+
+    padding: 3px;
+}
+
+.settingname {
+    color: #aaa;
+}
+
+.usersetting>ol {
+    margin: 0;
+    padding: 0;
+}
+
+.usersetting>ol>p {
+    padding: 5px;
+
+    cursor: pointer;
+}
+
+.usersetting>ol>p:hover {
+    background-color: #505050;
+}
+
+#room {
+    flex: 1;
+    height: 100%;
+
+    padding: 5px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+#toolbar {
+    display: flex;
+    justify-content: flex-end;
+
+    background-color: #444;
+
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.8);
+}
+
+#togglemembers {
+    cursor: pointer;
+}
+
+#loadprev {
+    border: none;
+    border-radius: 5px;
+
+    padding: 5px;
+
+    align-self: center;
+    margin-top: auto;
+
+    background-color: #303030;
+    color: white;
+
+    cursor: pointer;
+}
+
+#messages {
+    overflow-y: auto;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    gap: 3px;
+}
+
+.message {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+.message,
+.message * {
+    transition: background-color 10ms ease;
+}
+
+.message:hover *,
+.message:hover {
+    background-color: #4f4f4f;
+}
+
+.message * {
+    word-break: break-all;
+}
+
+.message .messageinfo {
+    display: flex;
+    gap: 5px;
+
+    margin-top: 8px;
+}
+
+.message .date {
+    color: #c0c0c0;
+    font-size: 0.8rem;
+}
+
+.message .file {
+    width: max-content;
+
+    padding: 5px;
+
+    border-radius: 5px;
+    text-decoration: underline;
+
+    background-color: #404040;
+    color: white;
+
+    cursor: pointer;
+}
+
+.message.unverified:hover *,
+.message.unverified:hover {
+    background-color: #993333;
+}
+
+.message.unverified .content {
+    color: #e37272;
+}
+
+.message img,
+.message video {
+    max-width: max(30%, 250px);
+
+    object-fit: contain;
+
+    border: 1px black solid;
+    border-radius: 5px;
+}
+
+#files {
+    width: 100%;
+
+    display: flex;
+    justify-content: flex-start;
+    gap: 3px;
+
+    color: white;
+}
+
+#files>p {
+    color: #d0d0d0;
+
+    cursor: pointer;
+    text-decoration: underline;
+
+    transition: color 0.2s ease-out;
+}
+
+#files>p:hover {
+    color: #aa3333;
+}
+
+#files:empty~hr {
+    display: none;
+}
+
+#messagebox {
+    width: 100%;
+
+    padding: 8px;
+
+    border-radius: 10px;
+
+    background-color: #404040;
+
+    display: flex;
+    flex-direction: column;
+}
+
+#messagebox>hr {
+    width: 100%;
+    height: 1px;
+
+    margin-bottom: 5px;
+    margin-top: 5px;
+
+    border-radius: 2px;
+    border: 0.5px #b0b0b0 solid;
+}
+
+#messagebox>.textarea {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+#messageinput {
+    width: 100%;
+    max-width: 100%;
+    min-height: 20px;
+    max-height: 30vh;
+
+    word-break: break-all;
+
+    background-color: inherit;
+    overflow-y: auto;
+
+    vertical-align: middle;
+
+    color: white;
+
+    border: none;
+    outline: none;
+    resize: none;
+}
+
+#messageinput:empty::before {
+    content: attr(aria-placeholder);
+    color: #ddd;
+    cursor: text;
+}
+
+#messagebox img {
+    height: 20px;
+    aspect-ratio: 1 / 1;
+
+    cursor: pointer;
+}
+
+#members {
+    width: 150px;
+
+    padding: 3px;
+
+    background-color: #4a4a4a;
+}
+
+#members>p {
+    color: #bababa;
+}
+
+#members p {
+    font-size: 12px;
+}
+
+#members>div {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+
+    overflow: hidden;
+
+    gap: 2px;
+}
+
+#members>div>p {
+    color: #ddd;
+}
+
+#contextmenu {
+    background-color: #111;
+    border-radius: 10px;
+    padding: 7px;
+
+    display: none;
+
+    position: absolute;
+
+    flex-direction: column;
+    justify-content: flex-start;
+}
+
+#contextmenu.visible {
+    display: flex;
+}
+
+#contextmenu p {
+    padding: 5px;
+    border-radius: 5px;
+
+    cursor: pointer;
+
+    transition: background-color 0.1s ease;
+}
+
+#contextmenu p:hover {
+    background-color: #3a3a3a;
+}
+
+#messageinfo {
+    display: none;
+
+    position: absolute;
+
+    width: max(30%, 200px);
+    left: 35%;
+    top: 35%;
+
+    aspect-ratio: 1 / 1;
+
+    resize: none;
+
+    border-radius: 10px;
+    padding: 10px;
+
+    border: 2px black solid;
+    outline: none;
+
+    background-color: #444;
+    color: white;
+
+    word-break: break-all;
+    overflow-x: hidden;
+}
+
+#messageinfo.visible {
+    display: block;
+}
+
+.popup {
+    position: absolute;
+    left: 0;
+    right: 0;
+
+    margin: auto;
+    margin-top: 20px;
+
+    width: fit-content;
+    height: fit-content;
+
+    border-radius: 1em;
+    padding: 10px;
+
+    background-color: #505050;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-track {
+    background-color: #c1c1c1;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background-color: #808080;
+    border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: #505050;
+}

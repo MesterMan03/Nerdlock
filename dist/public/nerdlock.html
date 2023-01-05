@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en-US">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Nerdlock official client</title>
+        <link rel="stylesheet" href="/css/nerdlock.css">
+        <link rel="manifest" href="/manifest.json">
+        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <meta name="application-name" content="Nerdlock">
+        <meta name="author" content="Mester">
+        <meta name="description" content="Simple-to-use E2EE messaging app designed to be secure and private">
+        <!-- script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js" defer></script -->
+    </head>
+
+    <body>
+        <nav id="navigator">
+            <img id="showuserauth" onclick="document.getElementById('usercontainer').style.display = 'flex'"
+                src="/img/user-picture.svg" alt="Show account page">
+            <hr>
+            <div id="rooms"></div>
+            <button id="createroom">+</button>
+        </nav>
+        <div id="usercontainer">
+            <div id="user">
+                <h2>Account</h2>
+                <button id="closeuser">X</button>
+                <form id="authform">
+                    <input id="homeserver" placeholder="Home server" value="https://localhost:4725" required>
+                    <input id="username" placeholder="Username" required>
+                    <input type="password" id="password" placeholder="Password" required>
+                    <input id="totpcode" placeholder="2fa code" pattern="^\d{6}$" title="6 numbers">
+                    <select id="authtype" required>
+                        <option value="login" selected>Login</option>
+                        <option value="register">Register</option>
+                    </select>
+                    <input type="submit" value="Do it">
+                </form>
+                <div id="userinfo" style="display: none;">
+                    <p id="userid"></p>
+                    <div class="usersetting">
+                        <p class="settingname">Security</p>
+                        <ol>
+                            <p class="setting" id="enabletotp">Enable TOTP 2FA</p>
+                            <p class="setting" id="enableu2f">Add U2F key</p>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="room">
+            <div id="toolbar">
+                <svg id="togglemembers" x="0" y="0" role="img" width="24" height="24" viewBox="0 0 24 24">
+                    <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                        d="M14 8.00598C14 10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 15.473 18 19.006V20.006H2V19.006Z">
+                    </path>
+                    <path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd"
+                        d="M14 8.00598C14 10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 15.473 18 19.006V20.006H2V19.006Z">
+                    </path>
+                    <path fill="currentColor"
+                        d="M20.0001 20.006H22.0001V19.006C22.0001 16.4433 20.2697 14.4415 17.5213 13.5352C19.0621 14.9127 20.0001 16.8059 20.0001 19.006V20.006Z">
+                    </path>
+                    <path fill="currentColor"
+                        d="M14.8834 11.9077C16.6657 11.5044 18.0001 9.9077 18.0001 8.00598C18.0001 5.96916 16.4693 4.28218 14.4971 4.0367C15.4322 5.09511 16.0001 6.48524 16.0001 8.00598C16.0001 9.44888 15.4889 10.7742 14.6378 11.8102C14.7203 11.8418 14.8022 11.8743 14.8834 11.9077Z">
+                    </path>
+                </svg>
+            </div>
+            <button id="loadprev">Load previous messages</button>
+            <div id="messages"></div>
+            <div id="messagebox">
+                <div id="files"></div>
+                <hr>
+                <div class="textarea">
+                    <img id="uploadfile" src="/img/upload-button.svg" alt="File upload button">
+                    <div role="textbox" id="messageinput" aria-placeholder="Type your message here"
+                        aria-label="Input box for your message" contenteditable="true"></div>
+                    <img id="sendmessage" src="/img/send.png" alt="Message send button">
+                </div>
+            </div>
+        </div>
+        <div id="members" style="display: none;">
+            <p>Online</p>
+            <div id="members.online"></div>
+
+            <p>Offline</p>
+            <div id="members.offline"></div>
+
+            <button id="invitemember">Invite member</button>
+        </div>
+        <div id="contextmenu">
+            <p id="replymessage">Reply (not available yet)</p>
+            <p id="deletemessage">Delete (not available yet)</p>
+            <p id="showmessageinfo">View Source</p>
+            <p id="copymessageid">Copy Message ID</p>
+        </div>
+        <textarea id="messageinfo" readonly="true"></textarea>
+        <script src="/js/nerdlock.js" type="module"></script>
+    </body>
+
+</html>

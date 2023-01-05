@@ -1,0 +1,10 @@
+dist/database
+dist/*.js
+dist/routers
+dist/public/js
+dist/public/service.js
+node_modules
+conf.toml
+package-lock.json
+*.pem
+ssl
