@@ -64,9 +64,6 @@ document.getElementById("authform").addEventListener("submit", async (event) => 
 
 //#region settings
 document.getElementById("enabletotp").addEventListener("click", async () => {
-    // under development
-    return;
-
     if (!client) return;
 
     if (client.user.mfa.totp)
@@ -103,6 +100,9 @@ document.getElementById("enabletotp").addEventListener("click", async () => {
 });
 
 document.getElementById("enableu2f").addEventListener("click", async () => {
+    // under development
+    return;
+
     if (!client) return;
 
     await client.u2f();

@@ -429,6 +429,8 @@ class NerdClient {
     }
 
     async u2f() {
+        return console.error("Under development");
+
         try {
             const r = await fetch(APIEndpoints.users.mfa.u2f.register, {
                 headers: { "Authorization": this.user.accessToken }
