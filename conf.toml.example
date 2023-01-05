@@ -15,9 +15,9 @@
 # SSL certificate, key and chain
 # ssl_cert = 
 # ssl_key = 
+# ssl_chain = 
 
 # Set this to true if you want to allow users to register
-# If it's false, you can register using the "reg_user" command
 # allow_registration = true
 
 # Origin for CORS and U2F
