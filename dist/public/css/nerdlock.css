@@ -1,4 +1,4 @@
-/* I'm not good at CSS, but at least I'm aware of that */
+/* I'm not good at CSS, but at least I'm aware of that - Mester */
 
 * {
     box-sizing: border-box;
@@ -139,7 +139,7 @@ body {
 #user {
     width: fit-content;
     border-radius: 1em;
-    background-color: #151418;
+    background-color: #3a3742;
 
     padding: 10px;
 

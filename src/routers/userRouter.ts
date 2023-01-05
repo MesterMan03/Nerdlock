@@ -326,6 +326,7 @@ router.post("/mfa/totp", authUser, verifyReq(totpRegisterSchema), async (req, re
 });
 
 router.get("/mfa/regU2F", authUser, async (req, res) => {
+    return res.status(501).send({ error: "Under development" });
     try {
         let mfa = await MFA.findOne({ userId: req.lockUser.userId });
         if (!mfa) mfa = await MFA.create({ userId: req.lockUser.userId });
@@ -363,6 +364,7 @@ const u2fRegisterSchema = yup.object({
     })
 })
 router.post("/mfa/regU2F", authUser, verifyReq(u2fRegisterSchema), async (req, res) => {
+    return res.status(501).send({ error: "Under development" });
     try {
         let mfa = await MFA.findOne({ userId: req.lockUser.userId });
         if (!mfa) mfa = await MFA.create({ userId: req.lockUser.userId });
