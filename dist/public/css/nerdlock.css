@@ -56,15 +56,17 @@ body {
 
 #navigator button,
 #navigator>img {
-    width: 100%;
-    aspect-ratio: 1 / 1;
+    width: 40px;
+    height: 40px;
 
     padding: 0;
     border: 0;
     border-radius: 25px;
 
+    overflow: hidden;
+
     color: #c0caf5;
-    font-size: 20px;
+    font-size: 50px;
 
     cursor: pointer;
 
@@ -201,6 +203,33 @@ body {
     background-color: #505050;
 }
 
+#base {
+    flex: 1;
+
+    display: flex;
+    flex-direction: column;
+}
+
+#toolbar {
+    height: 30px;
+
+    display: flex;
+    justify-content: flex-end;
+
+    align-items: center;
+
+    padding: 3px;
+
+    background-color: #1d1e23;
+
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.8);
+}
+
+
+#roomname {
+    margin-right: auto;
+}
+
 #room {
     flex: 1;
     height: 100%;
@@ -213,14 +242,6 @@ body {
     gap: 3px;
 }
 
-#toolbar {
-    display: flex;
-    justify-content: flex-end;
-
-    background-color: #1d1e23;
-
-    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.8);
-}
 
 #togglemembers {
     cursor: pointer;
@@ -376,7 +397,6 @@ body {
 #messageinput {
     width: 100%;
     max-width: 100%;
-    min-height: 20px;
     max-height: 30vh;
 
     word-break: break-all;
@@ -503,7 +523,7 @@ body {
     right: 0;
 
     margin: auto;
-    margin-top: 20px;
+    margin-top: 50px;
 
     width: fit-content;
     height: fit-content;
@@ -537,10 +557,10 @@ body {
 }
 
 .icon {
-  fill: #c0caf5;
-  transition: fill 0.2s;
+    fill: #c0caf5;
+    transition: fill 0.2s;
 }
 
 .icon:hover {
-  fill: #341fe3;
+    fill: #341fe3;
 }

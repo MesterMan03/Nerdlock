@@ -272,6 +272,8 @@ async function reloadRooms() {
 
             const realRoom = client.rooms.get(currentRoom);
 
+            document.getElementById("roomname").innerText = realRoom.name;
+
             messagesDiv.innerHTML = "";
 
             reloadMembers();
