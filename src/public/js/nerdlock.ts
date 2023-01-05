@@ -18,6 +18,8 @@ const messageInfo = document.getElementById("messageinfo") as HTMLTextAreaElemen
 
 let filesToUpload: NerdMessageFile[] = [];
 
+(document.getElementById("homeserver") as HTMLInputElement).value = location.origin;
+
 document.addEventListener("click", (e) => {
     if (e.target != messageInfo && messageInfo.classList.contains("visible")) {
         return messageInfo.classList.remove("visible");
@@ -26,6 +28,8 @@ document.addEventListener("click", (e) => {
     //@ts-expect-error
     if (e.target.offsetParent != contextMenu && contextMenu.classList.contains("visible")) {
         return contextMenu.classList.remove("visible");
+        contextMenu.style.top = "0px";
+        contextMenu.style.left = "0px";
     }
 })
 
@@ -358,13 +362,14 @@ async function addMessage(message: NerdMessage, needInfo: boolean) {
 
         event.preventDefault();
 
-        contextMenu.style.left = "0px";
-        contextMenu.style.top = "0px";
-
-        contextMenu.style.left = `${Math.min(event.clientX, document.body.clientWidth - contextMenu.clientWidth) - 20}px`;
-        contextMenu.style.top = `${Math.min(event.clientY, document.body.clientHeight - contextMenu.clientHeight) - 20}px`;
-        contextMenu.focus();
         contextMenu.classList.add("visible");
+
+        const { clientX: mouseX, clientY: mouseY } = event;
+        const { xNorm, yNorm } = normalizeContextPosition(mouseX, mouseY);
+
+        contextMenu.style.left = `${xNorm}px`;
+        contextMenu.style.top = `${yNorm}px`;
+        contextMenu.focus();
 
         document.getElementById("showmessageinfo").onclick = () => {
             messageInfo.value = JSON.stringify(message);
@@ -424,6 +429,17 @@ function createPopup() {
     document.body.appendChild(popup);
 
     return popup;
+}
+
+const normalizeContextPosition = (mouseX: number, mouseY: number) => {
+    const xNorm = mouseX + contextMenu.scrollWidth >= window.innerWidth
+        ? window.innerWidth - contextMenu.scrollWidth - 20
+        : mouseX;
+    const yNorm = mouseY + contextMenu.scrollHeight >= window.innerHeight
+        ? window.innerHeight - contextMenu.scrollHeight - 20
+        : mouseY;
+
+    return { xNorm, yNorm };
 }
 
 
