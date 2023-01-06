@@ -109,7 +109,7 @@ body {
 
 #authform>input,
 #authform>select {
-    border-radius: 5px;
+    border-radius: 3px;
     outline: none;
     border: none;
 
