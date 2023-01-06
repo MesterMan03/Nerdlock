@@ -24,7 +24,7 @@ p {
 
 body {
     position: relative;
-    
+
     display: flex;
     flex-direction: row;
     background-color: #151418;
@@ -501,10 +501,13 @@ body {
     display: none;
 
     position: absolute;
+    left: 0;
+    right: 0;
+    
+    margin: auto;
+    margin-top: 20vh;
 
     width: max(30%, 200px);
-    left: 35%;
-    top: 35%;
 
     aspect-ratio: 1 / 1;
 
