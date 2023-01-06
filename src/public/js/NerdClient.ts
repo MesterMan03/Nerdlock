@@ -201,7 +201,7 @@ class NerdClient {
                 masterKey: string;
             }
 
-            data.public.oneTimeKeys.concat(data.usedOneTimeKeys);
+            data.public.oneTimeKeys = data.public.oneTimeKeys.concat(data.usedOneTimeKeys);
             const secretRequests = data.secretRequests;
             const secretMessages = data.secretMessages;
             const masterKeyEnc = data.masterKey;
@@ -429,6 +429,8 @@ class NerdClient {
     }
 
     async u2f() {
+        return console.error("Under development");
+
         try {
             const r = await fetch(APIEndpoints.users.mfa.u2f.register, {
                 headers: { "Authorization": this.user.accessToken }
@@ -693,7 +695,7 @@ class RoomManager {
             return this.#client.userSecrets.sendSecretMessage(userId, { type: "roomInvite", data: inviteData });
         } catch (err) {
             console.error(err);
-            console.log(`Couldn't create invite for room ${roomId}`);
+            console.log(`Couldn't create invite ${userId} to ${roomId}`);
             return false;
         }
     }

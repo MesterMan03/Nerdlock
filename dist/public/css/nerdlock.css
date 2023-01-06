@@ -11,7 +11,7 @@ body {
     margin: 0;
     padding: 0;
 
-    overflow-y: hidden;
+    overflow: hidden;
 }
 
 p {
@@ -21,11 +21,11 @@ p {
 }
 
 body {
+    position: relative;
+    
     display: flex;
     flex-direction: row;
     background-color: #151418;
-
-    overflow-y: hidden;
 }
 
 
@@ -56,8 +56,8 @@ body {
 
 #navigator button,
 #navigator>img {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
 
     padding: 0;
     border: 0;
@@ -66,7 +66,7 @@ body {
     overflow: hidden;
 
     color: #c0caf5;
-    font-size: 50px;
+    font-size: 15px;
 
     cursor: pointer;
 
@@ -98,6 +98,8 @@ body {
     display: flex;
     flex-direction: column;
     gap: 5px;
+
+    align-items: center;
 
     overflow-x: hidden;
     overflow-y: auto;
@@ -206,6 +208,8 @@ body {
 #base {
     flex: 1;
 
+    height: 100%;
+
     display: flex;
     flex-direction: column;
 }
@@ -232,7 +236,8 @@ body {
 
 #room {
     flex: 1;
-    height: 100%;
+
+    max-height: calc(100% - 30px);
 
     padding: 5px;
 

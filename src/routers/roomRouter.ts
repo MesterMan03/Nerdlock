@@ -169,9 +169,7 @@ const inviteSchema = yup.object({
 router.post("/:roomId/invite/:userId", authRoom, verifyReq(inviteSchema), async (req, res) => {
     try {
         const roomId = req.params.roomId;
-        const room = await Room.findOne({ roomId, invites: { $not: { $elemMatch: { to: req.params.userId.toString() } } } });
-
-        if (!room) return res.status(403).send({ error: "User is already invited" });
+        const room = await Room.findOne({ roomId });
 
         const invite: NerdRoomInvite = {
             from: req.lockUser.userId,
