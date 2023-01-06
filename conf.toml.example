@@ -1,24 +1,24 @@
-# This is the secret key used to encrypt some non-message related stuff, i.e. access tokens
+# This is the secret key used to encrypt some non-message related stuff, i.e. access tokens [required]
 # db_secret = 
 
-# Url of the MongoDB server (database name included)
+# Url of the MongoDB server (database name included) [required]
 # db_url = 
-# Path of certificate file in case you use that for MongoDB authentication
+# Path of certificate file in case you use that for MongoDB authentication [optional]
 # db_key =
 
-# Port of the server to run on
+# Port of the server to run on [required]
 # port = "4725"
 
-# If the server should use HTTPS (highly recommended if it's not behind a reverse proxy)
+# If the server should use HTTPS (highly recommended if it's not behind a reverse proxy) [required]
 # use_https = true
 
-# SSL certificate, key and chain
+# SSL certificate, key and chain [required only if use_https is true]
 # ssl_cert = 
 # ssl_key = 
 # ssl_chain = 
 
-# Set this to true if you want to allow users to register
+# Set this to true if you want to allow users to register [required]
 # allow_registration = true
 
-# Origin for CORS and U2F
+# Origin for CORS and U2F [required]
 # origin = 
