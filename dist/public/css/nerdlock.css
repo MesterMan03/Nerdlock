@@ -8,7 +8,7 @@
     --white: #e0e5fa;
     --grey: #98a0c3;
     --background: #151418;
-    --column-colour: #1a1b26;
+    --column-colour: #28293a;
     --light-brand-colour: #a6b4f1;
     --brand-colour: #c0caf5;
     --button-colour: #8a76fc;
@@ -237,6 +237,7 @@ body {
     padding-bottom: 20px;
 
     background-color: var(--column-colour);
+    text-align: center
 }
 
 #settingsbar {
@@ -289,12 +290,18 @@ body {
 
 #settings>ol>p {
     padding: 5px;
+    color:  var(--white);
 
     cursor: pointer;
 }
 
 #settings>ol>p:hover {
-    background-color: var(--grey);
+    background-color: var(--light-brand-colour);
+}
+
+.settingname {
+    font-weight: bold;
+    color: var(--light-brand-colour);
 }
 
 #base {
