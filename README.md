@@ -20,3 +20,10 @@ The repository contains both the backend and the frontend which is served by the
 2. After that you can compile the Typescript code with ```npm run build```.
 3. Now you need to create a config file (you can find an example in the repository).
 4. With all set you can start the server (which includes both backend and frontend) with ```npm start start <your config file>```.
+
+## Upcoming features
+* Avatars for users and rooms
+* Editing, replying and deleting messages
+* More sophisticated encryption schemes
+* Permission system for rooms
+* Markdown syntax for messages
