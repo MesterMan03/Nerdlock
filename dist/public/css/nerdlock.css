@@ -4,6 +4,20 @@
     box-sizing: border-box;
 }
 
+:root {
+    --white: #e0e5fa;
+    --grey: #98a0c3;
+    --background: #151418;
+    --column-colour: #1a1b26;
+    --light-brand-colour: #a6b4f1;
+    --brand-colour: #c0caf5;
+    --button-colour: #8a76fc;
+    --button-outline-colour: #765efc;
+    --bar-colour: #232433;
+    --warning-colour: #ff6c60;
+    --dark-warning-colour: #f7768e;
+}
+
 html,
 body {
     width: 100%;
@@ -18,7 +32,7 @@ body {
 
 p {
     margin: 0;
-    color: #98a0c3;
+    color: var(--grey);
     font-size: 1rem;
 }
 
@@ -27,7 +41,7 @@ body {
 
     display: flex;
     flex-direction: row;
-    background-color: #151418;
+    background-color: var(--background);
 }
 
 
@@ -35,7 +49,7 @@ body {
     width: 60px;
     padding: 5px;
 
-    background-color: #1a1b26;
+    background-color: var(--column-colour);
 
     display: flex;
     flex-direction: column;
@@ -53,7 +67,7 @@ body {
 
     border-radius: 5px;
 
-    background-color: #c0caf5;
+    background-color: var(--brand-colour);
 }
 
 #navigator button {
@@ -66,8 +80,8 @@ body {
 
     overflow: hidden;
     
-    background-color: #151418;
-    color: #c0caf5;
+    background-color: var(--background);
+    color: var(--brand-colour);
     font-size: 15px;
 
     cursor: pointer;
@@ -77,8 +91,8 @@ body {
 
 #navigator button:hover {
     border-radius: 10px;
-    background-color: #8a76fc;
-    color: #e0e5fa;
+    background-color: var(--button-colour);
+    color: var(--white);
 }
 
 
@@ -115,13 +129,13 @@ body {
 
     padding: 5px;
 
-    background-color: #1d1e23;
+    background-color: var(--background);
 
-    color: #eee;
+    color: var(--white);
 }
 
 #authform>input::placeholder {
-    color: #d0d0d0;
+    color: var(--grey);
 }
 
 #usercontainer {
@@ -138,7 +152,7 @@ body {
 #user {
     width: fit-content;
     border-radius: 0.25em;
-    background-color: #3a3742;
+    background-color: var(--bar-colour);
 
     padding: 10px;
 
@@ -150,7 +164,7 @@ body {
 }
 
 #user>h2 {
-    color: #eee;
+    color: var(--white);
     margin: 35px;
 }
 
@@ -166,16 +180,16 @@ body {
 
     cursor: pointer;
 
-    color: #eee;
-    border-radius: 50%; /* Creates a circular shape */
-    border: 2px solid #765efc; /* Adds an outline */
-    background-color: #8a76fc; /* Fills up the inside */
+    color: var(--white);
+    border-radius: 50%;
+    border: 2px solid var(--button-outline-colour);
+    background-color: var(--button-colour);
     width: 20px;
     height: 20px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #e0e5fa;
+    color: var(--white);
 }
 
 #userinfo {
@@ -184,14 +198,14 @@ body {
 }
 
 .usersetting {
-    border-top: 2px #666 solid;
+    border-top: 2px var(--grey) solid;
     margin-top: 5px;
 
     padding: 3px;
 }
 
 .settingname {
-    color: #aaa;
+    color: var(--grey);
 }
 
 .usersetting>ol {
@@ -206,7 +220,7 @@ body {
 }
 
 .usersetting>ol>p:hover {
-    background-color: #505050;
+    background-color: var(--grey);
 }
 
 #base {
@@ -228,7 +242,7 @@ body {
 
     padding: 3px;
 
-    background-color: #232433;
+    background-color: var(--bar-colour);
 
     box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.8);
 }
@@ -265,8 +279,8 @@ body {
     align-self: center;
     margin-top: auto;
 
-    background-color: #303030;
-    color: #c0caf5;
+    background-color: var(--bar-colour);
+    color: var(--brand-colour);
 
     cursor: pointer;
 }
@@ -294,7 +308,7 @@ body {
 
 .message:hover *,
 .message:hover {
-    background-color: #4f4f4f;
+    background-color: var(--column-colour);
 }
 
 .message * {
@@ -305,12 +319,14 @@ body {
     display: flex;
     justify-content: space-between;
     gap: 5px;
-
+    
     margin-top: 8px;
 }
-
-.message .date {
-    color: #c0c0c0;
+.messageinfo {
+    color: var(--light-brand-colour);
+}
+.date {
+    color: var(--grey);
     font-size: 0.8rem;
 }
 
@@ -322,19 +338,19 @@ body {
     border-radius: 5px;
     text-decoration: underline;
 
-    background-color: #1d1e23;
-    color: #c0caf5;
+    background-color: var(--bar-colour);
+    color: var(--brand-colour);
 
     cursor: pointer;
 }
 
 .message.unverified:hover *,
 .message.unverified:hover {
-    background-color: #f7768e;
+    background-color: var(--dark-warning-colour);
 }
 
 .message.unverified .content {
-    color: #ff6c60;
+    color: var(--warning-colour);
 }
 
 .message img,
@@ -343,8 +359,11 @@ body {
 
     object-fit: contain;
 
-    border: 1px #341fe3;
+    border: 1px var(--button-colour);
     border-radius: 5px;
+}
+.message>.content {
+    color: var(--white);
 }
 
 #files {
@@ -354,11 +373,11 @@ body {
     justify-content: flex-start;
     gap: 3px;
 
-    color: #c0caf5;
+    color: var(--brand-colour);
 }
 
 #files>p {
-    color: #d0d0d0;
+    color: var(--white);
 
     cursor: pointer;
     text-decoration: underline;
@@ -367,7 +386,7 @@ body {
 }
 
 #files>p:hover {
-    color: #aa3333;
+    color: var(--button-colour);
 }
 
 #files:empty~hr {
@@ -381,7 +400,7 @@ body {
 
     border-radius: 10px;
 
-    background-color: #1d1e23;
+    background-color: var(--bar-colour);
 
     display: flex;
     flex-direction: column;
@@ -395,7 +414,7 @@ body {
     margin-top: 5px;
 
     border-radius: 2px;
-    border: 0.5px #b0b0b0 solid;
+    border: 0.5px var(--brand-colour) solid;
 }
 
 #messagebox>.textarea {
@@ -408,6 +427,7 @@ body {
     width: 100%;
     max-width: 100%;
     max-height: 30vh;
+    margin-left: 4px;
 
     word-break: break-all;
 
@@ -416,7 +436,7 @@ body {
 
     vertical-align: middle;
 
-    color: #c0caf5;
+    color: var(--brand-colour);
 
     border: none;
     outline: none;
@@ -425,7 +445,7 @@ body {
 
 #messageinput:empty::before {
     content: attr(aria-placeholder);
-    color: #ddd;
+    color: var(--grey);
     cursor: text;
 }
 
@@ -440,11 +460,11 @@ body {
 
     padding: 3px;
 
-    background-color: #4a4a4a;
+    background-color: var(--column-colour);
 }
 
 #members>p {
-    color: #bababa;
+    color: var(--light-brand-colour);
 }
 
 #members p {
@@ -464,11 +484,11 @@ body {
 }
 
 #members>div>p {
-    color: #ddd;
+    color: var(--white);
 }
 
 #contextmenu {
-    background-color: #111;
+    background-color: var(--bar-colour);
     border-radius: 10px;
     padding: 7px;
 
@@ -487,6 +507,8 @@ body {
 #contextmenu p {
     padding: 5px;
     border-radius: 5px;
+    
+    color: var(--white);
 
     cursor: pointer;
 
@@ -494,7 +516,7 @@ body {
 }
 
 #contextmenu p:hover {
-    background-color: #3a3a3a;
+    background-color: var(--button-colour);
 }
 
 #messageinfo {
@@ -519,8 +541,8 @@ body {
     border: 2px #341fe3;
     outline: none;
 
-    background-color: #1d1e23;
-    color: #c0caf5;
+    background-color: var(--bar-colour);
+    color: var(--brand-colour);
 
     word-break: break-all;
     overflow-x: hidden;
@@ -544,7 +566,7 @@ body {
     border-radius: 0.25em;
     padding: 10px;
 
-    background-color: #505050;
+    background-color: var(--grey);
 
     display: flex;
     flex-direction: column;
@@ -556,24 +578,24 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-    background-color: #c1c1c1;
+    background-color: var(--bar-colour);
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: #808080;
-    border-radius: 10px;
+    background-color: var(--light-brand-colour);
+    border-radius: 100px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background-color: #505050;
+    background-color: var(--brand-colour);
 }
 
 .icon {
-    fill: #a6b4f1;
+    fill: var(--light-brand-colour);
     transition: fill 0.2s;
 }
 
 .icon:hover {
-    fill: #e0e5fA;
+    fill: var(--white);
 }
