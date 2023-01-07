@@ -75,6 +75,7 @@ body {
 
 #navigator button,
 #showsettings {
+    width: 100%;
     aspect-ratio: 1/1;
 
     padding: 0;
@@ -98,6 +99,11 @@ body {
     color: var(--white);
 }
 
+#showsettings {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
 
 #createroom {
     /* Hurray, !important */
@@ -430,6 +436,7 @@ body {
 
     display: flex;
     justify-content: flex-start;
+    align-items: center;
     gap: 3px;
 
     color: var(--brand-colour);
@@ -445,10 +452,31 @@ body {
 }
 
 #files>p:hover {
-    color: var(--button-colour);
+    color: var(--warning-colour);
 }
 
-#files:empty~hr {
+#files:empty+hr {
+    display: none;
+}
+
+#replyingto {
+    width: fit-content;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    color: var(--brand-colour);
+
+    cursor: pointer;
+
+    transition: color 0.2s ease-out;
+}
+
+#replyingto:hover {
+    color: var(--warning-colour);
+}
+
+#replyingto:empty+hr {
     display: none;
 }
 
@@ -486,7 +514,6 @@ body {
     width: 100%;
     max-width: 100%;
     max-height: 30vh;
-    margin-left: 4px;
 
     word-break: break-all;
 
@@ -506,6 +533,8 @@ body {
     content: attr(aria-placeholder);
     color: var(--grey);
     cursor: text;
+
+    height: 100%;
 }
 
 #messagebox svg {
@@ -659,12 +688,13 @@ body {
     fill: var(--white);
 }
 
-@media only screen and (hover: none) and (pointer: coarse){
+@media only screen and (hover: none) and (pointer: coarse) {
 
     #navigator {
         width: 13%;
     }
-    #rooms,    
+
+    #rooms,
     #createroom {
         /* Hurray, !important */
         width: 100%;

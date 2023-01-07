@@ -8,12 +8,17 @@ import { nerdServer } from "../index.js";
 import { sseSessions } from "../sse.js";
 import { NerdMessage, NerdRoom, NerdRoomInvite, NerdRoomMember, NerdUserRoomData } from "../types.js";
 import { authRoom, authUser, verifyReq } from "../utils.js";
+import rateLimit from "express-rate-limit";
 
 const router = Router();
 
 router.use("*", authUser);
 
-router.post("/create", async (req, res) => {
+router.post("/create", rateLimit({
+    windowMs: 60_000,
+    max: 5,
+    standardHeaders: true
+}), async (req, res) => {
     try {
         if (!req.body.name || !req.body.roomSecret) {
             res.sendStatus(400);
@@ -55,7 +60,11 @@ router.post("/create", async (req, res) => {
     }
 });
 
-router.get("/sync", authUser, async (req, res) => {
+router.get("/sync", rateLimit({
+    windowMs: 60_000,
+    max: 10,
+    standardHeaders: true
+}), authUser, async (req, res) => {
     const user = await User.findOne({ userId: req.lockUser.userId });
 
     // get all rooms the user is in
@@ -92,7 +101,11 @@ const messagesSchema = yup.object({
         after: yup.number().notRequired().integer()
     })
 })
-router.get("/:roomId/messages", authRoom, verifyReq(messagesSchema), async (req, res) => {
+router.get("/:roomId/messages", rateLimit({
+    windowMs: 60_000,
+    max: 20,
+    standardHeaders: true
+}), authRoom, verifyReq(messagesSchema), async (req, res) => {
     try {
         const roomId = req.params.roomId;
 
@@ -121,7 +134,11 @@ const messageSchema = yup.object({
         signature: yup.string().required()
     })
 })
-router.post("/:roomId/message", authRoom, verifyReq(messageSchema), async (req, res) => {
+router.post("/:roomId/message", rateLimit({
+    windowMs: 60_000,
+    max: 30,
+    standardHeaders: true
+}), authRoom, verifyReq(messageSchema), async (req, res) => {
     try {
         const roomId = String(req.params.roomId);
         const cipherText = String(req.body.cipherText);
@@ -166,7 +183,11 @@ const inviteSchema = yup.object({
         userId: yup.string().required().matches(/^\d+$/)
     })
 })
-router.post("/:roomId/invite/:userId", authRoom, verifyReq(inviteSchema), async (req, res) => {
+router.post("/:roomId/invite/:userId", rateLimit({
+    windowMs: 60_000,
+    max: 15,
+    standardHeaders: true
+}), authRoom, verifyReq(inviteSchema), async (req, res) => {
     try {
         const roomId = req.params.roomId;
         const room = await Room.findOne({ roomId });
@@ -186,7 +207,11 @@ router.post("/:roomId/invite/:userId", authRoom, verifyReq(inviteSchema), async 
     }
 });
 
-router.get("/join/:roomId", async (req, res) => {
+router.get("/join/:roomId", rateLimit({
+    windowMs: 60_000,
+    max: 10,
+    standardHeaders: true
+}), async (req, res) => {
     try {
         const room = await Room.findOne({ roomId: req.params.roomId.toString(), invites: { $elemMatch: { to: req.lockUser.userId } } });
         if (!room)

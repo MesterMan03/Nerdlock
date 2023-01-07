@@ -61,6 +61,7 @@ export interface NerdMessageFile {
 export interface NerdMessageContent {
     text?: string;
     files?: NerdMessageFile[];
+    replyingTo?: string;
 }
 
 export interface NerdMessage {
@@ -550,7 +551,7 @@ class RoomManager {
 
             // verify message
             const keys = Object.keys(message)
-            if (keys.length === 0 || keys.find(k => !["text", "files"].includes(k)))
+            if (keys.length === 0 || keys.find(k => !["text", "files", "replyingTo"].includes(k)))
                 throw new Error("Invalid message structure");
 
             const key = await CryptoHelper.keyFromUint(CryptoHelper.enc.StringToUint(room.secret, "base64"));

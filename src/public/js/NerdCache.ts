@@ -8,7 +8,7 @@ export interface NerdCache {
 let db: IDBDatabase;
 export const cache: NerdCache = { messages: [], users: [] };
 
-const r = window.indexedDB.open("NerdCache", 2);
+const r = window.indexedDB.open("NerdCache", 1);
 
 r.onsuccess = async () => {
     db = r.result;
@@ -24,7 +24,7 @@ r.onupgradeneeded = async (ev) => {
     db.createObjectStore("users", { keyPath: "userId" });
 }
 
-window.addEventListener("beforeunload", async (event) => {
+window.addEventListener("beforeunload", async () => {
     await storeCache();
 });
 

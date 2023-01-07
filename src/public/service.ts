@@ -14,9 +14,6 @@ const CachedFiles = [
     "/js/nerdlock.js",
     "/js/NerdUtils.js",
     "/js/CryptoHelper.js",
-    "/img/user-picture.svg",
-    "/img/upload-button.svg",
-    "/img/send.png"
 ];
 
 self.addEventListener('install', function (event) {
@@ -72,18 +69,20 @@ self.addEventListener('activate', function (event) {
     )
 })
 
-self.addEventListener("message", function (event) {
+self.addEventListener("message", async function (event) {
     try {
         const message = JSON.parse(event.data);
 
         if (message.action === "saveDB") {
             const data = message.data as NerdCache;
 
+            if (!(await indexedDB.databases()).find(db => db.name === "NerdCache"))
+                return;
+
             const r = indexedDB.open("NerdCache", message.version);
 
             r.onsuccess = () => {
                 try {
-
                     const db = r.result;
 
                     console.log(`[Nerdlock] Writing cache...`);
