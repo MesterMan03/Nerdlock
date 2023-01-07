@@ -26,3 +26,4 @@ The repository contains both the backend and the frontend which is served by the
 * Editing, replying and deleting messages
 * More sophisticated encryption schemes
 * Permission system for rooms
+* Markdown syntax for messages
