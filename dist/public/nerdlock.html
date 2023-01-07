@@ -2,13 +2,13 @@
 <html lang="en-US">
 
     <head>
+        <title>Nerdlock official client</title>
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Nerdlock official client</title>
         <link rel="stylesheet" href="/css/nerdlock.css">
         <link rel="manifest" href="/manifest.webmanifest">
         <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="application-name" content="Nerdlock">
         <meta name="author" content="Mester">
         <meta name="description" content="Simple-to-use E2EE messaging app designed to be secure and private">
@@ -17,15 +17,32 @@
 
     <body>
         <nav id="navigator">
-            <svg id="showuserauth" class="icon" onclick="document.getElementById('usercontainer').style.display = 'flex'" alt="Show account page" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M6,17C6,15 10,13.9 12,13.9C14,13.9 18,15 18,17V18H6M15,9C15,10.66 13.66,12 12,12C10.34,12 9,10.66 9,9C9,7.34 10.34,6 12,6C13.66,6 15,7.34 15,9M3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.9 20.1,3 19,3H5C3.89,3 3,3.9 3,5Z" /></svg>
+            <svg id="showuserauth" class="icon"
+                onclick="document.getElementById('usercontainer').style.display = 'flex'" alt="Show account page"
+                xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                <path
+                    d="M6,17C6,15 10,13.9 12,13.9C14,13.9 18,15 18,17V18H6M15,9C15,10.66 13.66,12 12,12C10.34,12 9,10.66 9,9C9,7.34 10.34,6 12,6C13.66,6 15,7.34 15,9M3,5V19C3,20.1 3.9,21 5,21H19C20.1,21 21,20.1 21,19V5C21,3.9 20.1,3 19,3H5C3.89,3 3,3.9 3,5Z" />
+            </svg>
             <hr>
             <div id="rooms"></div>
             <button id="createroom">+</button>
+            <svg id="showsettings" class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
+                onclick="document.getElementById('settingscontainer').style.display='flex';">
+                <path
+                    d="M19.738 10H22V14H19.739C19.498 14.931 19.1 15.798 18.565 16.564L20 18L18 20L16.565 18.564C15.797 19.099 14.932 19.498 14 19.738V22H10V19.738C9.069 19.498 8.203 19.099 7.436 18.564L6 20L4 18L5.436 16.564C4.901 15.799 4.502 14.932 4.262 14H2V10H4.262C4.502 9.068 4.9 8.202 5.436 7.436L4 6L6 4L7.436 5.436C8.202 4.9 9.068 4.502 10 4.262V2H14V4.261C14.932 4.502 15.797 4.9 16.565 5.435L18 3.999L20 5.999L18.564 7.436C19.099 8.202 19.498 9.069 19.738 10ZM12 16C14.2091 16 16 14.2091 16 12C16 9.79086 14.2091 8 12 8C9.79086 8 8 9.79086 8 12C8 14.2091 9.79086 16 12 16Z">
+                </path>
+            </svg>
         </nav>
         <div id="usercontainer">
             <div id="user">
                 <h2>Account</h2>
-                <button id="closeuser">X</button>
+                <button id="closeuser" onclick="document.getElementById('usercontainer').style.display='none';">
+                    <svg class="icon" width="20" height="20" viewBox="0 0 24 24">
+                        <path
+                            d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z">
+                        </path>
+                    </svg>
+                </button>
                 <form id="authform">
                     <input id="homeserver" placeholder="Home server" value="https://nerd.mester.info" required>
                     <input id="username" placeholder="Username" required>
@@ -35,32 +52,26 @@
                         <option value="login" selected>Login</option>
                         <option value="register">Register</option>
                     </select>
-                    <input type="submit" value="Do it">
+                    <input type="submit" value="Proceed">
                 </form>
-                <div id="userinfo" style="display: none;">
-                    <p id="userid"></p>
-                    <div class="usersetting">
-                        <p class="settingname">Security</p>
-                        <ol>
-                            <p class="setting" id="enabletotp">Enable TOTP 2FA</p>
-                            <p class="setting" id="enableu2f">Add U2F key (under development)</p>
-                        </ol>
-                    </div>
-                </div>
+                <p id="userid"></p>
             </div>
         </div>
         <main id="base">
             <div id="toolbar">
                 <p id="roomname">Loading...</p>
                 <svg id="togglemembers" class="icon" x="0" y="0" role="img" width="24" height="24" viewBox="0 0 24 24">
-                  <path fill-rule="evenodd" clip-rule="evenodd"
+                    <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M14 8.00598C14 10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 15.473 18 19.006V20.006H2V19.006Z">
                     </path>
-                    <path fill-rule="evenodd" clip-rule="evenodd"d="M14 8.00598C14 10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 15.473 18 19.006V20.006H2V19.006Z">
+                    <path fill-rule="evenodd" clip-rule="evenodd"
+                        d="M14 8.00598C14 10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 15.473 18 19.006V20.006H2V19.006Z">
                     </path>
-                    <path d="M20.0001 20.006H22.0001V19.006C22.0001 16.4433 20.2697 14.4415 17.5213 13.5352C19.0621 14.9127 20.0001 16.8059 20.0001 19.006V20.006Z">
+                    <path
+                        d="M20.0001 20.006H22.0001V19.006C22.0001 16.4433 20.2697 14.4415 17.5213 13.5352C19.0621 14.9127 20.0001 16.8059 20.0001 19.006V20.006Z">
                     </path>
-                    <path d="M14.8834 11.9077C16.6657 11.5044 18.0001 9.9077 18.0001 8.00598C18.0001 5.96916 16.4693 4.28218 14.4971 4.0367C15.4322 5.09511 16.0001 6.48524 16.0001 8.00598C16.0001 9.44888 15.4889 10.7742 14.6378 11.8102C14.7203 11.8418 14.8022 11.8743 14.8834 11.9077Z">
+                    <path
+                        d="M14.8834 11.9077C16.6657 11.5044 18.0001 9.9077 18.0001 8.00598C18.0001 5.96916 16.4693 4.28218 14.4971 4.0367C15.4322 5.09511 16.0001 6.48524 16.0001 8.00598C16.0001 9.44888 15.4889 10.7742 14.6378 11.8102C14.7203 11.8418 14.8022 11.8743 14.8834 11.9077Z">
                     </path>
                 </svg>
             </div>
@@ -71,11 +82,17 @@
                     <div id="files"></div>
                     <hr>
                     <div class="textarea">
-                      <div role="textbox" id="messageinput" aria-placeholder="Type your message here"
+                        <div role="textbox" id="messageinput" aria-placeholder="Type your message here"
                             aria-label="Input box for your message" contenteditable="true"></div>
-                        <svg id="uploadfile" class="icon" alt="File upload button" xmlns="http://www.w3.org/2000/svg" view
-    Box="0 0 24 24"><path d="M14,2L20,8V20C20,21.1 19.1,22 18,22H6C4.9,22 4,21.1 4,20V4C4,2.9 4.9,2 6,2H14M18,20V9H13V4H6V20H18M12,12L16,16H13.5V19H10.5V16H8L12,12Z" /></svg>
-                        <svg id="sendmessage" class="icon" alt="Message send button" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3,20V4L22,12M5,17L16.85,12L5,7V10.5L11,12L5,13.5M5,17V7Z" /></svg>
+                        <svg id="uploadfile" class="icon" alt="File upload button" xmlns="http://www.w3.org/2000/svg"
+                            view Box="0 0 24 24">
+                            <path
+                                d="M14,2L20,8V20C20,21.1 19.1,22 18,22H6C4.9,22 4,21.1 4,20V4C4,2.9 4.9,2 6,2H14M18,20V9H13V4H6V20H18M12,12L16,16H13.5V19H10.5V16H8L12,12Z" />
+                        </svg>
+                        <svg id="sendmessage" class="icon" alt="Message send button" xmlns="http://www.w3.org/2000/svg"
+                            viewBox="0 0 24 24">
+                            <path d="M3,20V4L22,12M5,17L16.85,12L5,7V10.5L11,12L5,13.5M5,17V7Z" />
+                        </svg>
                     </div>
                 </div>
             </div>
@@ -96,6 +113,22 @@
             <p id="copymessageid">Copy Message ID</p>
         </div>
         <textarea id="messageinfo" readonly="true"></textarea>
+        <div id="settingscontainer" style="display: none;">
+            <div id="settings">
+                <button onclick="document.getElementById('settingscontainer').style.display='none';">
+                    <svg class="icon" width="20" height="20" viewBox="0 0 24 24">
+                        <path
+                            d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z">
+                        </path>
+                    </svg>
+                </button>
+                <p class="settingname">Security</p>
+                <ol>
+                    <p class="setting" id="enabletotp">Enable TOTP 2FA</p>
+                    <p class="setting" id="enableu2f">Add U2F key (under development)</p>
+                </ol>
+            </div>
+        </div>
         <script src="/js/nerdlock.js" type="module"></script>
     </body>
 
