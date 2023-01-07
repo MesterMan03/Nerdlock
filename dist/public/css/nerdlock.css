@@ -74,7 +74,7 @@ body {
 }
 
 #navigator button,
-#navigator svg {
+#showsettings {
     aspect-ratio: 1/1;
 
     padding: 0;
@@ -103,10 +103,6 @@ body {
     /* Hurray, !important */
     font-size: 35px !important;
     margin-top: auto;
-}
-
-#showsettings {
-    background-color: #fff;
 }
 
 #rooms {

@@ -6,7 +6,7 @@ globalThis.CryptoHelper = CryptoHelper;
 let client: NerdClient;
 let currentRoom: string;
 
-const dateFormat: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: "numeric", minute: "numeric", second: "numeric" };
+const dateFormat: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'numeric', day: 'numeric', hour: "numeric", minute: "numeric", second: "numeric" };
 
 const messagesDiv = document.getElementById("messages") as HTMLDivElement;
 const roomsDiv = document.getElementById("rooms") as HTMLDivElement;
