@@ -75,8 +75,7 @@ body {
 
 #navigator button,
 #navigator svg {
-    width: 50px;
-    height: 50px;
+    aspect-ratio: 1/1;
 
     padding: 0;
     border: 0;
@@ -86,7 +85,7 @@ body {
 
     background-color: var(--background);
     color: var(--brand-colour);
-    font-size: 15px;
+    font-size: 1rem;
 
     cursor: pointer;
 
@@ -264,13 +263,6 @@ body {
     align-items: center;
 }
 
-@media only screen and (max-device-width:480px) {
-    #settingscontainer {
-        width: 100%;
-        padding-left: 5px;
-        padding-right: 5px;
-    }
-}
 
 .settingname {
     color: var(--grey);
@@ -669,4 +661,18 @@ body {
 
 .icon:hover {
     fill: var(--white);
+}
+
+@media only screen and (hover: none) and (pointer: coarse){
+
+    #navigator {
+        width: 13%;
+    }
+    #rooms,    
+    #createroom {
+        /* Hurray, !important */
+        width: 100%;
+    }
+
+
 }
