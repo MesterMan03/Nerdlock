@@ -24,7 +24,7 @@ body {
     height: 100%;
     margin: 0;
     padding: 0;
-    
+
     font-family: sans-serif;
 
     overflow: hidden;
@@ -57,6 +57,9 @@ body {
     align-items: center;
 
     gap: 3px;
+
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 #navigator>hr {
@@ -70,7 +73,8 @@ body {
     background-color: var(--brand-colour);
 }
 
-#navigator button {
+#navigator button,
+#navigator svg {
     width: 50px;
     height: 50px;
 
@@ -79,7 +83,7 @@ body {
     border-radius: 25px;
 
     overflow: hidden;
-    
+
     background-color: var(--background);
     color: var(--brand-colour);
     font-size: 15px;
@@ -99,19 +103,24 @@ body {
 #createroom {
     /* Hurray, !important */
     font-size: 35px !important;
+    margin-top: auto;
+}
+
+#showsettings {
+    background-color: #fff;
 }
 
 #rooms {
     width: 100%;
+    max-height: 83%;
 
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-
-    align-items: center;
-
-    overflow-x: hidden;
     overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#rooms>button {
+    margin-top: 1.5px;
+    margin-bottom: 1.5px;
 }
 
 #authform {
@@ -173,6 +182,9 @@ body {
     right: 10px;
     top: 10px;
 
+    width: 20px;
+    height: 20px;
+
     margin: 0;
     padding: 0;
     border: 0;
@@ -184,42 +196,98 @@ body {
     border-radius: 50%;
     border: 2px solid var(--button-outline-colour);
     background-color: var(--button-colour);
-    width: 20px;
-    height: 20px;
+
     display: flex;
-    align-items: center;
     justify-content: center;
-    color: var(--white);
+    align-items: center;
 }
 
 #userinfo {
     flex-direction: column;
-    width: 100%;
+    justify-content: flex-start;
+
+    position: relative;
 }
 
-.usersetting {
-    border-top: 2px var(--grey) solid;
-    margin-top: 5px;
+#settingscontainer {
+    width: 100%;
+    height: 100%;
 
-    padding: 3px;
+    position: absolute;
+    top: 0;
+    left: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding-left: 15%;
+    padding-right: 15%;
+
+    background-color: var(--background);
+}
+
+#settings {
+    flex: 1;
+    height: 100%;
+
+    position: relative;
+
+    padding-top: 20px;
+    padding-bottom: 20px;
+
+    background-color: var(--column-colour);
+}
+
+#settings>button {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+
+    width: 20px;
+    height: 20px;
+
+    padding: 0;
+    margin: 0;
+    background: none;
+    outline: none;
+
+    cursor: pointer;
+
+    color: var(--white);
+    border-radius: 50%;
+    border: 2px solid var(--button-outline-colour);
+    background-color: var(--button-colour);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+@media only screen and (max-device-width:480px) {
+    #settingscontainer {
+        width: 100%;
+        padding-left: 5px;
+        padding-right: 5px;
+    }
 }
 
 .settingname {
     color: var(--grey);
 }
 
-.usersetting>ol {
+#settings>ol {
     margin: 0;
     padding: 0;
 }
 
-.usersetting>ol>p {
+#settings>ol>p {
     padding: 5px;
 
     cursor: pointer;
 }
 
-.usersetting>ol>p:hover {
+#settings>ol>p:hover {
     background-color: var(--grey);
 }
 
@@ -319,12 +387,14 @@ body {
     display: flex;
     justify-content: space-between;
     gap: 5px;
-    
+
     margin-top: 8px;
 }
+
 .messageinfo {
     color: var(--light-brand-colour);
 }
+
 .date {
     color: var(--grey);
     font-size: 0.8rem;
@@ -362,6 +432,7 @@ body {
     border: 1px var(--button-colour);
     border-radius: 5px;
 }
+
 .message>.content {
     color: var(--white);
 }
@@ -507,7 +578,7 @@ body {
 #contextmenu p {
     padding: 5px;
     border-radius: 5px;
-    
+
     color: var(--white);
 
     cursor: pointer;
@@ -525,7 +596,7 @@ body {
     position: absolute;
     left: 0;
     right: 0;
-    
+
     margin: auto;
     margin-top: 20vh;
 

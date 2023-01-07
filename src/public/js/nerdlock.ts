@@ -33,16 +33,11 @@ document.addEventListener("click", (e) => {
     }
 })
 
-document.getElementById("closeuser").addEventListener("click", () => {
-    document.getElementById("usercontainer").style.display = "none";
-})
-
 document.getElementById("authform").addEventListener("submit", async (event) => {
     event.preventDefault();
 
     document.getElementById("authform").style.display = "none";
 
-    document.getElementById("userinfo").style.display = "flex";
     document.getElementById("userid").innerText = "Loading...";
 
     const homeServer = (document.getElementById("homeserver") as HTMLInputElement).value;
@@ -54,7 +49,6 @@ document.getElementById("authform").addEventListener("submit", async (event) => 
     const newClient = type === "login" ? await NerdClient.login(homeServer, username, password, { totp: totp === "" ? undefined : totp }) : await NerdClient.register(homeServer, username, password);
     if (!newClient) {
         document.getElementById("authform").style.display = "flex";
-        document.getElementById("userinfo").style.display = "none";
         alert("Failed to authenticate, please check the console");
         return;
     }
@@ -90,10 +84,10 @@ document.getElementById("enabletotp").addEventListener("click", async () => {
 
     input.focus();
 
-    input.addEventListener("keydown", (ev) => {
+    input.addEventListener("keydown", async (ev) => {
         if (ev.key !== "Enter") return;
 
-        const result = client.totp("activate", input.value);
+        const result = await client.totp("activate", input.value);
         if (result)
             alert("TOTP 2FA has been enabled!");
         else
