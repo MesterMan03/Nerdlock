@@ -12,13 +12,11 @@ import rateLimit from "express-rate-limit";
 
 const router = Router();
 
-router.use("*", authUser);
-
 router.post("/create", rateLimit({
     windowMs: 60_000,
     max: 5,
     standardHeaders: true
-}), async (req, res) => {
+}), authUser, async (req, res) => {
     try {
         if (!req.body.name || !req.body.roomSecret) {
             res.sendStatus(400);
@@ -105,7 +103,7 @@ router.get("/:roomId/messages", rateLimit({
     windowMs: 60_000,
     max: 20,
     standardHeaders: true
-}), authRoom, verifyReq(messagesSchema), async (req, res) => {
+}), authUser, authRoom, verifyReq(messagesSchema), async (req, res) => {
     try {
         const roomId = req.params.roomId;
 
@@ -138,7 +136,7 @@ router.post("/:roomId/message", rateLimit({
     windowMs: 60_000,
     max: 30,
     standardHeaders: true
-}), authRoom, verifyReq(messageSchema), async (req, res) => {
+}), authUser, authRoom, verifyReq(messageSchema), async (req, res) => {
     try {
         const roomId = String(req.params.roomId);
         const cipherText = String(req.body.cipherText);
@@ -187,7 +185,7 @@ router.post("/:roomId/invite/:userId", rateLimit({
     windowMs: 60_000,
     max: 15,
     standardHeaders: true
-}), authRoom, verifyReq(inviteSchema), async (req, res) => {
+}), authUser, authRoom, verifyReq(inviteSchema), async (req, res) => {
     try {
         const roomId = req.params.roomId;
         const room = await Room.findOne({ roomId });
@@ -211,7 +209,7 @@ router.get("/join/:roomId", rateLimit({
     windowMs: 60_000,
     max: 10,
     standardHeaders: true
-}), async (req, res) => {
+}), authUser, async (req, res) => {
     try {
         const room = await Room.findOne({ roomId: req.params.roomId.toString(), invites: { $elemMatch: { to: req.lockUser.userId } } });
         if (!room)
