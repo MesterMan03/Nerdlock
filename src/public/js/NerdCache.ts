@@ -43,7 +43,7 @@ async function loadCache() {
 
             cursor.continue();
         }
-        cache.messages.sort((a, b) => a.createdAt - b.createdAt)
+        cache.messages = cache.messages.sort((a, b) => a.createdAt - b.createdAt);
     } catch { ; }
 }
 
