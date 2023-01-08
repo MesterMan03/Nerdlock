@@ -1,7 +1,7 @@
 {
-    "name": "nerdlock-server",
-    "version": "1.0.0",
-    "description": "A simple E2EE messaging app server.",
+    "name": "nerdlock",
+    "version": "b1.0.3",
+    "description": "A simple E2EE messaging app.",
     "main": "dist/index.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
@@ -9,7 +9,7 @@
         "start": "node dist/index.js"
     },
     "author": "Mester",
-    "license": "ISC",
+    "license": "Apache-2.0",
     "type": "module",
     "devDependencies": {
         "@types/compression": "^1.7.2",
@@ -25,10 +25,10 @@
     },
     "dependencies": {
         "@ltd/j-toml": "^1.35.2",
-        "cbor": "^8.1.0",
         "compression": "^1.7.4",
         "cors": "^2.8.5",
         "express": "^4.18.2",
+        "express-rate-limit": "^6.7.0",
         "express-session": "^1.17.3",
         "fido2-lib": "^3.3.4",
         "jscrypto": "^1.0.3",
@@ -39,5 +39,8 @@
         "qrcode": "^1.5.1",
         "uuid": "^9.0.0",
         "yup": "^0.32.11"
+    },
+    "engines": {
+        "node": ">= 14"
     }
 }

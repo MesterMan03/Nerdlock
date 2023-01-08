@@ -1,7 +1,21 @@
-/* I'm not good at CSS, but at least I'm aware of that */
+/* I'm not good at CSS, but at least I'm aware of that - Mester */
 
 * {
     box-sizing: border-box;
+}
+
+:root {
+    --white: #e0e5fa;
+    --grey: #98a0c3;
+    --background: #151418;
+    --column-colour: #28293a;
+    --light-brand-colour: #a6b4f1;
+    --brand-colour: #c0caf5;
+    --button-colour: #8a76fc;
+    --button-outline-colour: #765efc;
+    --bar-colour: #232433;
+    --warning-colour: #ff6c60;
+    --dark-warning-colour: #f7768e;
 }
 
 html,
@@ -11,21 +25,23 @@ body {
     margin: 0;
     padding: 0;
 
-    overflow-y: hidden;
+    font-family: sans-serif;
+
+    overflow: hidden;
 }
 
 p {
     margin: 0;
-    color: #c0caf5;
+    color: var(--grey);
     font-size: 1rem;
 }
 
 body {
+    position: relative;
+
     display: flex;
     flex-direction: row;
-    background-color: #151418;
-
-    overflow-y: hidden;
+    background-color: var(--background);
 }
 
 
@@ -33,7 +49,7 @@ body {
     width: 60px;
     padding: 5px;
 
-    background-color: #333;
+    background-color: var(--column-colour);
 
     display: flex;
     flex-direction: column;
@@ -41,6 +57,9 @@ body {
     align-items: center;
 
     gap: 3px;
+
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 #navigator>hr {
@@ -51,54 +70,63 @@ body {
 
     border-radius: 5px;
 
-    background-color: #c0caf5;
+    background-color: var(--brand-colour);
 }
 
 #navigator button,
-#navigator>img {
+#createroom,
+#showsettings {
     width: 100%;
-    aspect-ratio: 1 / 1;
+    aspect-ratio: 1/1;
 
     padding: 0;
     border: 0;
     border-radius: 25px;
 
-    color: #c0caf5;
-    font-size: 20px;
+    overflow: hidden;
+
+    background-color: var(--background);
+    color: var(--brand-colour);
+    font-size: 1rem;
 
     cursor: pointer;
 
     transition: border-radius 0.2s ease-out, background-color 0.2s ease-out, color 0.2s;
 }
 
-#navigator button:hover,
-#navigator>img:hover {
-    border-radius: 10px;
-    color: #341fe3;
-}
-
-#navigator button {
-    background-color: #151418;
-}
-
 #navigator button:hover {
-    background-color: #606060;
+    border-radius: 10px;
+    background-color: var(--button-colour);
+    color: var(--white);
 }
+
 
 #createroom {
-    /* Hurray, !important */
-    font-size: 35px !important;
+    margin-top: auto;
+}
+
+#createroom>svg {
+    width: 100%;
+    height: 100%;
+}
+
+#showsettings {
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #rooms {
     width: 100%;
+    max-height: 83%;
 
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-
-    overflow-x: hidden;
     overflow-y: auto;
+    overflow-x: hidden;
+}
+
+#rooms>button {
+    margin-top: 1.5px;
+    margin-bottom: 1.5px;
 }
 
 #authform {
@@ -110,19 +138,19 @@ body {
 
 #authform>input,
 #authform>select {
-    border-radius: 5px;
+    border-radius: 3px;
     outline: none;
     border: none;
 
     padding: 5px;
 
-    background-color: #1d1e23;
+    background-color: var(--background);
 
-    color: #eee;
+    color: var(--white);
 }
 
 #authform>input::placeholder {
-    color: #d0d0d0;
+    color: var(--grey);
 }
 
 #usercontainer {
@@ -138,8 +166,8 @@ body {
 
 #user {
     width: fit-content;
-    border-radius: 1em;
-    background-color: #151418;
+    border-radius: 0.25em;
+    background-color: var(--bar-colour);
 
     padding: 10px;
 
@@ -151,14 +179,17 @@ body {
 }
 
 #user>h2 {
-    color: #eee;
-    margin: 5px;
+    color: var(--white);
+    margin: 35px;
 }
 
 #user>button {
     position: absolute;
     right: 10px;
     top: 10px;
+
+    width: 20px;
+    height: 20px;
 
     margin: 0;
     padding: 0;
@@ -167,43 +198,149 @@ body {
 
     cursor: pointer;
 
-    color: #eee;
+    color: var(--white);
+    border-radius: 50%;
+    border: 2px solid var(--button-outline-colour);
+    background-color: var(--button-colour);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 #userinfo {
     flex-direction: column;
-    width: 100%;
+    justify-content: flex-start;
+
+    position: relative;
 }
 
-.usersetting {
-    border-top: 2px #666 solid;
-    margin-top: 5px;
+#settingscontainer {
+    height: 100%;
+    width: 100%;
 
-    padding: 3px;
+    position: absolute;
+    flex-direction: column;
+
+    background-color: var(--background);
+}
+
+#settings {
+    flex: 1;
+    height: 100%;
+
+    position: relative;
+
+    padding-top: 20px;
+    padding-bottom: 20px;
+
+    background-color: var(--column-colour);
+
+    text-align: center;
+}
+
+#settingsbar {
+    height: 30px;
+
+
+    display: flex;
+    justify-content: flex-end;
+
+    padding: 30x;
+
+    background-color: var(--bar-colour);
+
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.8);
+}
+
+#settingsbar>button {
+    position: absolute;
+    right: 5px;
+    top: 5px;
+
+    width: 20px;
+    height: 20px;
+
+    padding: 0;
+    margin: 0;
+    background: none;
+    outline: none;
+
+    cursor: pointer;
+
+    color: var(--white);
+    border-radius: 50%;
+    border: 2px solid var(--button-outline-colour);
+    background-color: var(--button-colour);
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .settingname {
-    color: #aaa;
+    color: var(--grey);
 }
 
-.usersetting>ol {
+#settings>ol {
     margin: 0;
     padding: 0;
 }
 
-.usersetting>ol>p {
+#settings>ol>p {
     padding: 5px;
+    color: var(--white);
 
     cursor: pointer;
 }
 
-.usersetting>ol>p:hover {
-    background-color: #505050;
+#settings>ol>p:hover {
+    background-color: var(--light-brand-colour);
+}
+
+.settingname {
+    font-weight: bold;
+    color: var(--light-brand-colour);
+}
+
+.settingname {
+    font-weight: bold;
+    color: var(--light-brand-colour);
+}
+
+#base {
+    flex: 1;
+
+    height: 100%;
+
+    display: flex;
+    flex-direction: column;
+}
+
+#toolbar {
+    height: 30px;
+
+    display: flex;
+    justify-content: flex-end;
+
+    align-items: center;
+
+    padding: 3px;
+
+    background-color: var(--bar-colour);
+
+    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.8);
+}
+
+
+#roomname {
+    margin-right: auto;
 }
 
 #room {
     flex: 1;
-    height: 100%;
+
+    max-height: calc(100% - 30px);
 
     padding: 5px;
 
@@ -213,14 +350,6 @@ body {
     gap: 3px;
 }
 
-#toolbar {
-    display: flex;
-    justify-content: flex-end;
-
-    background-color: #1d1e23;
-
-    box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.8);
-}
 
 #togglemembers {
     cursor: pointer;
@@ -235,8 +364,8 @@ body {
     align-self: center;
     margin-top: auto;
 
-    background-color: #303030;
-    color: #c0caf5;
+    background-color: var(--bar-colour);
+    color: var(--brand-colour);
 
     cursor: pointer;
 }
@@ -264,22 +393,49 @@ body {
 
 .message:hover *,
 .message:hover {
-    background-color: #4f4f4f;
+    background-color: var(--column-colour);
 }
 
 .message * {
-    word-break: break-all;
+    word-break: break-word;
+    white-space: break-spaces;
 }
 
-.message .messageinfo {
+.message.highlight {
+    transition: background-color 0.3s ease;
+    background-color: var(--column-colour);
+}
+
+.messageinfo {
     display: flex;
+    justify-content: space-between;
     gap: 5px;
 
     margin-top: 8px;
+    color: var(--light-brand-colour);
 }
 
-.message .date {
-    color: #c0c0c0;
+.reply+.messageinfo {
+    margin-top: 0px;
+}
+
+.reply {
+    margin-top: 8px;
+    color: var(--white);
+
+    cursor: pointer;
+
+    transition: color 0.2s ease;
+
+    font-size: 0.8rem;
+}
+
+.reply:hover {
+    color: var(--grey);
+}
+
+.date {
+    color: var(--grey);
     font-size: 0.8rem;
 }
 
@@ -291,19 +447,19 @@ body {
     border-radius: 5px;
     text-decoration: underline;
 
-    background-color: #1d1e23;
-    color: #c0caf5;
+    background-color: var(--bar-colour);
+    color: var(--brand-colour);
 
     cursor: pointer;
 }
 
 .message.unverified:hover *,
 .message.unverified:hover {
-    background-color: #f7768e;
+    background-color: var(--dark-warning-colour);
 }
 
 .message.unverified .content {
-    color: #ff6c60;
+    color: var(--warning-colour);
 }
 
 .message img,
@@ -312,8 +468,12 @@ body {
 
     object-fit: contain;
 
-    border: 1px #341fe3;
+    border: 1px var(--button-colour);
     border-radius: 5px;
+}
+
+.message>.content {
+    color: var(--white);
 }
 
 #files {
@@ -321,13 +481,14 @@ body {
 
     display: flex;
     justify-content: flex-start;
+    align-items: center;
     gap: 3px;
 
-    color: #c0caf5;
+    color: var(--brand-colour);
 }
 
 #files>p {
-    color: #d0d0d0;
+    color: var(--white);
 
     cursor: pointer;
     text-decoration: underline;
@@ -336,10 +497,31 @@ body {
 }
 
 #files>p:hover {
-    color: #aa3333;
+    color: var(--warning-colour);
 }
 
-#files:empty~hr {
+#files:empty+hr {
+    display: none;
+}
+
+#replyingto {
+    width: fit-content;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    color: var(--brand-colour);
+
+    cursor: pointer;
+
+    transition: color 0.2s ease-out;
+}
+
+#replyingto:hover {
+    color: var(--warning-colour);
+}
+
+#replyingto:empty+hr {
     display: none;
 }
 
@@ -350,7 +532,7 @@ body {
 
     border-radius: 10px;
 
-    background-color: #1d1e23;
+    background-color: var(--bar-colour);
 
     display: flex;
     flex-direction: column;
@@ -364,7 +546,7 @@ body {
     margin-top: 5px;
 
     border-radius: 2px;
-    border: 0.5px #b0b0b0 solid;
+    border: 0.5px var(--brand-colour) solid;
 }
 
 #messagebox>.textarea {
@@ -376,8 +558,8 @@ body {
 #messageinput {
     width: 100%;
     max-width: 100%;
-    min-height: 20px;
     max-height: 30vh;
+    margin-left: 4px;
 
     word-break: break-all;
 
@@ -386,7 +568,7 @@ body {
 
     vertical-align: middle;
 
-    color: #c0caf5;
+    color: var(--brand-colour);
 
     border: none;
     outline: none;
@@ -395,8 +577,10 @@ body {
 
 #messageinput:empty::before {
     content: attr(aria-placeholder);
-    color: #ddd;
+    color: var(--grey);
     cursor: text;
+
+    height: 100%;
 }
 
 #messagebox svg {
@@ -410,11 +594,11 @@ body {
 
     padding: 3px;
 
-    background-color: #4a4a4a;
+    background-color: var(--column-colour);
 }
 
 #members>p {
-    color: #bababa;
+    color: var(--light-brand-colour);
 }
 
 #members p {
@@ -434,11 +618,11 @@ body {
 }
 
 #members>div>p {
-    color: #ddd;
+    color: var(--white);
 }
 
 #contextmenu {
-    background-color: #111;
+    background-color: var(--bar-colour);
     border-radius: 10px;
     padding: 7px;
 
@@ -458,23 +642,28 @@ body {
     padding: 5px;
     border-radius: 5px;
 
+    color: var(--white);
+
     cursor: pointer;
 
     transition: background-color 0.1s ease;
 }
 
 #contextmenu p:hover {
-    background-color: #3a3a3a;
+    background-color: var(--button-colour);
 }
 
 #messageinfo {
     display: none;
 
     position: absolute;
+    left: 0;
+    right: 0;
+
+    margin: auto;
+    margin-top: 20vh;
 
     width: max(30%, 200px);
-    left: 35%;
-    top: 35%;
 
     aspect-ratio: 1 / 1;
 
@@ -486,8 +675,8 @@ body {
     border: 2px #341fe3;
     outline: none;
 
-    background-color: #1d1e23;
-    color: #c0caf5;
+    background-color: var(--bar-colour);
+    color: var(--brand-colour);
 
     word-break: break-all;
     overflow-x: hidden;
@@ -503,15 +692,15 @@ body {
     right: 0;
 
     margin: auto;
-    margin-top: 20px;
+    margin-top: 50px;
 
     width: fit-content;
     height: fit-content;
 
-    border-radius: 1em;
+    border-radius: 0.25em;
     padding: 10px;
 
-    background-color: #505050;
+    background-color: var(--grey);
 
     display: flex;
     flex-direction: column;
@@ -523,24 +712,35 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-    background-color: #c1c1c1;
+    background-color: var(--bar-colour);
     border-radius: 10px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background-color: #808080;
-    border-radius: 10px;
+    background-color: var(--light-brand-colour);
+    border-radius: 100px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background-color: #505050;
+    background-color: var(--brand-colour);
 }
 
 .icon {
-  fill: #c0caf5;
-  transition: fill 0.2s;
+    fill: var(--light-brand-colour);
+    transition: fill 0.2s;
 }
 
 .icon:hover {
-  fill: #341fe3;
+    fill: var(--white);
+}
+
+@media only screen and (hover: none) and (pointer: coarse) {
+    #navigator {
+        width: 13%;
+    }
+
+    #rooms,
+    #createroom {
+        width: 100%;
+    }
 }

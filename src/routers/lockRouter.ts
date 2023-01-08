@@ -4,6 +4,7 @@ import sse from "../sse.js";
 import { authUser } from "../utils.js";
 import roomRouter from "./roomRouter.js";
 import userRouter from "./userRouter.js";
+import rateLimit from "express-rate-limit";
 
 const router = Router();
 
@@ -19,7 +20,11 @@ router.get("/info", (req, res) => {
     });
 });
 
-router.get("/sse", authUser, sse);
+router.get("/sse", rateLimit({
+    windowMs: 60000,
+    max: 5,
+    standardHeaders: true
+}), authUser, sse);
 
 router.use("/users", userRouter);
 router.use("/rooms", roomRouter);

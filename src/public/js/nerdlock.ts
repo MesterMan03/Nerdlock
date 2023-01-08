@@ -6,7 +6,7 @@ globalThis.CryptoHelper = CryptoHelper;
 let client: NerdClient;
 let currentRoom: string;
 
-const dateFormat: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: "numeric", minute: "numeric", second: "numeric" };
+const dateFormat: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'numeric', day: 'numeric', hour: "numeric", minute: "numeric", second: "numeric" };
 
 const messagesDiv = document.getElementById("messages") as HTMLDivElement;
 const roomsDiv = document.getElementById("rooms") as HTMLDivElement;
@@ -17,6 +17,10 @@ const contextMenu = document.getElementById("contextmenu") as HTMLDivElement;
 const messageInfo = document.getElementById("messageinfo") as HTMLTextAreaElement;
 
 let filesToUpload: NerdMessageFile[] = [];
+let replyingTo: string;
+let loadingRoom: boolean = false;
+
+(document.getElementById("homeserver") as HTMLInputElement).value = location.origin;
 
 document.addEventListener("click", (e) => {
     if (e.target != messageInfo && messageInfo.classList.contains("visible")) {
@@ -26,11 +30,9 @@ document.addEventListener("click", (e) => {
     //@ts-expect-error
     if (e.target.offsetParent != contextMenu && contextMenu.classList.contains("visible")) {
         return contextMenu.classList.remove("visible");
+        contextMenu.style.top = "0px";
+        contextMenu.style.left = "0px";
     }
-})
-
-document.getElementById("closeuser").addEventListener("click", () => {
-    document.getElementById("usercontainer").style.display = "none";
 })
 
 document.getElementById("authform").addEventListener("submit", async (event) => {
@@ -38,7 +40,6 @@ document.getElementById("authform").addEventListener("submit", async (event) => 
 
     document.getElementById("authform").style.display = "none";
 
-    document.getElementById("userinfo").style.display = "flex";
     document.getElementById("userid").innerText = "Loading...";
 
     const homeServer = (document.getElementById("homeserver") as HTMLInputElement).value;
@@ -50,7 +51,7 @@ document.getElementById("authform").addEventListener("submit", async (event) => 
     const newClient = type === "login" ? await NerdClient.login(homeServer, username, password, { totp: totp === "" ? undefined : totp }) : await NerdClient.register(homeServer, username, password);
     if (!newClient) {
         document.getElementById("authform").style.display = "flex";
-        document.getElementById("userinfo").style.display = "none";
+        document.getElementById("userid").style.display = "none";
         alert("Failed to authenticate, please check the console");
         return;
     }
@@ -64,9 +65,6 @@ document.getElementById("authform").addEventListener("submit", async (event) => 
 
 //#region settings
 document.getElementById("enabletotp").addEventListener("click", async () => {
-    // under development
-    return;
-
     if (!client) return;
 
     if (client.user.mfa.totp)
@@ -89,10 +87,10 @@ document.getElementById("enabletotp").addEventListener("click", async () => {
 
     input.focus();
 
-    input.addEventListener("keydown", (ev) => {
+    input.addEventListener("keydown", async (ev) => {
         if (ev.key !== "Enter") return;
 
-        const result = client.totp("activate", input.value);
+        const result = await client.totp("activate", input.value);
         if (result)
             alert("TOTP 2FA has been enabled!");
         else
@@ -103,6 +101,9 @@ document.getElementById("enabletotp").addEventListener("click", async () => {
 });
 
 document.getElementById("enableu2f").addEventListener("click", async () => {
+    // under development
+    return;
+
     if (!client) return;
 
     await client.u2f();
@@ -119,41 +120,53 @@ document.getElementById("createroom").onclick = async () => {
     reloadRooms();
 }
 
-async function sendMessage(event: MouseEvent | KeyboardEvent) {
+document.getElementById("replyingto").onclick = () => {
+    document.getElementById("replyingto").innerText = "";
+    replyingTo = null;
+}
+
+async function sendMessage() {
     if (!client) return;
 
     const room = client.rooms.get(currentRoom);
     if (!room) return;
 
-    if ((event instanceof KeyboardEvent && event.key === "Enter" && !event.shiftKey) || event instanceof MouseEvent) {
-        event.preventDefault();
+    const content = messageInput.innerText.trim();
+    if (content === "" && filesToUpload.length === 0) return;
 
-        const content = messageInput.innerText.trim();
-        if (content === "" && filesToUpload.length === 0) return;
+    const files: NerdMessageFile[] = [];
+    loadfiles: for (const f of filesToUpload) {
+        if (f.size > 10_000_000) // skip file if it's over 10 mb
+            continue;
 
-        const files: NerdMessageFile[] = [];
-        loadfiles: for (const f of filesToUpload) {
-            if (f.size > 10_000_000) // skip file if it's over 10 mb
-                continue;
+        if (files.map(f => f.size).reduce((prev, curr) => prev + curr, 0) > 10_000_000) // stop calculating files if total is already over 10 mb
+            break loadfiles;
 
-            if (files.map(f => f.size).reduce((prev, curr) => prev + curr, 0) > 10_000_000) // stop calculating files if total is already over 10 mb
-                break loadfiles;
+        files.push(f);
 
-            files.push(f);
-
-            if (files.map(f => f.size).reduce((prev, curr) => prev + curr, 0) > 10_000_000) // remove last file if total is already over 10 mb
-                files.pop();
-        }
-
-        filesToUpload = [];
-        filesDiv.innerText = "";
-        messageInput.innerText = "";
-        client.rooms.sendMessage(room.roomId, { text: content, files });
+        if (files.map(f => f.size).reduce((prev, curr) => prev + curr, 0) > 10_000_000) // remove last file if total is already over 10 mb
+            files.pop();
     }
+
+    filesToUpload = [];
+    filesDiv.innerText = "";
+    messageInput.innerText = "";
+    document.getElementById("replyingto").innerText = "";
+
+    client.rooms.sendMessage(room.roomId, { text: content, files, replyingTo });
+    replyingTo = null;
 }
 
-messageInput.addEventListener("keypress", sendMessage);
-document.getElementById("sendmessage").addEventListener("click", sendMessage);
+messageInput.addEventListener("keypress", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+});
+document.getElementById("sendmessage").addEventListener("click", (event) => {
+    event.preventDefault();
+    sendMessage();
+});
 
 document.getElementById("messageinput").addEventListener("paste", async (event: ClipboardEvent) => {
     if (event.clipboardData.files.length !== 0)
@@ -240,8 +253,12 @@ window.addEventListener("nerdlock.newMessage", (event: CustomEvent<NerdMessage>)
     const room = client.rooms.get(currentRoom);
     if (!room || currentRoom !== event.detail.roomId) return;
 
-    addMessage(event.detail, room.messages[room.messages.findIndex(m => m.messageId === event.detail.messageId) - 1]?.authorId !== event.detail.authorId).then(() => {
-        scrollToBottom();
+    room.messages = room.messages.sort((a, b) => a.createdAt - b.createdAt);
+
+    addMessage(event.detail, shouldAddInfo(room.messages, event.detail)).then(() => {
+        // only scroll down, if the user is already scrolled down (the plus 50 is added so a small scroll will still trigger)
+        if (messagesDiv.scrollTop + messagesDiv.clientHeight + 50 >= messagesDiv.scrollHeight)
+            scrollToBottom();
     });
 });
 
@@ -267,6 +284,11 @@ async function reloadRooms() {
         roomsDiv.appendChild(button);
 
         button.onclick = async () => {
+            if (loadingRoom) return;
+
+            loadingRoom = true;
+            document.getElementById("roomname").innerText = "Loading room, please wait...";
+
             if (currentRoom === room.roomId) return;
             currentRoom = room.roomId;
 
@@ -274,11 +296,15 @@ async function reloadRooms() {
 
             messagesDiv.innerHTML = "";
 
-            reloadMembers();
+            await reloadMembers();
             await client.rooms.loadMessages(realRoom.roomId, { after: realRoom.messages.slice(-1)[0]?.createdAt });
-            await Promise.all(realRoom.messages.map((m, index, self) => addMessage(m, self[index - 1]?.authorId !== m.authorId)));
+            for (const m of realRoom.messages) {
+                await addMessage(m, shouldAddInfo(realRoom.messages, m));
+            }
 
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            loadingRoom = false;
+            document.getElementById("roomname").innerText = realRoom.name;
         }
     }
 }
@@ -306,11 +332,44 @@ async function addMessage(message: NerdMessage, needInfo: boolean) {
 
     const author = await client.userStore.fetchUser(message.authorId);
     const messageDiv = document.createElement("div");
+    messageDiv.id = `message.${message.messageId}`;
     messageDiv.classList.add("message");
 
     if (!message.verified) messageDiv.classList.add("unverified");
 
-    if ((message.content?.files ?? []).length !== 0) needInfo = true;
+    if ((message.content.files ?? []).length !== 0) needInfo = true;
+    if (message.content.replyingTo) needInfo = true;
+
+    addReply: if (message.content.replyingTo) {
+        const repliedMessage = client.rooms.get(currentRoom).messages.find(m => m.messageId === message.content.replyingTo);
+
+        const reply = document.createElement("div");
+        reply.classList.add("reply");
+        if (!repliedMessage) {
+            reply.innerText = `Message couldn't be loaded`;
+            break addReply;
+        }
+
+        reply.onclick = () => {
+            const message = document.getElementById(`message.${repliedMessage.messageId}`);
+            messagesDiv.scroll({ top: message.offsetTop - 100, behavior: "smooth" });
+
+            message.classList.add("highlight");
+            setTimeout(() => {
+                message.classList.remove("highlight");
+            }, 800);
+        }
+
+        const author = await client.userStore.fetchUser(repliedMessage.authorId);
+        reply.innerText = `${author.username}: `;
+
+        if (repliedMessage.content.text)
+            reply.innerText += `${repliedMessage.content.text}`;
+        else if (repliedMessage.content.files?.length !== 0)
+            reply.innerText += `${repliedMessage.content.files.length} files uploaded`;
+
+        messageDiv.appendChild(reply);
+    }
 
     if (needInfo) {
         const messageInfo = document.createElement("p");
@@ -356,24 +415,33 @@ async function addMessage(message: NerdMessage, needInfo: boolean) {
 
         event.preventDefault();
 
-        contextMenu.style.left = "0px";
-        contextMenu.style.top = "0px";
-
-        contextMenu.style.left = `${Math.min(event.clientX, document.body.clientWidth - contextMenu.clientWidth) - 20}px`;
-        contextMenu.style.top = `${Math.min(event.clientY, document.body.clientHeight - contextMenu.clientHeight) - 20}px`;
-        contextMenu.focus();
         contextMenu.classList.add("visible");
 
-        document.getElementById("showmessageinfo").onclick = () => {
-            messageInfo.value = JSON.stringify(message);
+        const { clientX: mouseX, clientY: mouseY } = event;
+        const { xNorm, yNorm } = normalizeContextPosition(mouseX, mouseY);
+
+        contextMenu.style.left = `${xNorm}px`;
+        contextMenu.style.top = `${yNorm}px`;
+        contextMenu.focus();
+
+        document.getElementById("replymessage").onclick = () => {
             contextMenu.classList.remove("visible");
 
+            document.getElementById("replyingto").innerText = `Replying to ${author.username}`;
+            replyingTo = message.messageId;
+        }
+
+        document.getElementById("showmessageinfo").onclick = () => {
+            contextMenu.classList.remove("visible");
+
+            messageInfo.value = JSON.stringify(message);
             setTimeout(() => messageInfo.classList.add("visible"), 100);
         }
 
         document.getElementById("copymessageid").onclick = () => {
-            navigator.clipboard.writeText(message.messageId);
             contextMenu.classList.remove("visible");
+
+            navigator.clipboard.writeText(message.messageId);
         }
     })
 
@@ -411,7 +479,9 @@ async function loadPrevMessages() {
     const currentScroll = messagesDiv.scrollHeight - messagesDiv.clientHeight - messagesDiv.scrollTop;
 
     messagesDiv.innerHTML = "";
-    await Promise.all(room.messages.map((m, index, self) => addMessage(m, self[index - 1]?.authorId !== m.authorId)));
+    for (const m of room.messages) {
+        await addMessage(m, shouldAddInfo(room.messages, m));
+    }
 
     messagesDiv.scrollTop = messagesDiv.scrollHeight - messagesDiv.clientHeight - currentScroll;
 }
@@ -422,6 +492,24 @@ function createPopup() {
     document.body.appendChild(popup);
 
     return popup;
+}
+
+function shouldAddInfo(messages: NerdMessage[], message: NerdMessage, index?: number) {
+    const previous = messages[index ? (index - 1) : (messages.findIndex(m => m.messageId === message.messageId) - 1)];
+    if (!previous) return true;
+
+    return message.authorId !== previous.authorId || (message.createdAt - previous.createdAt) > 5 * 60 * 1000; // if there are 5 minutes between the two messages, include info again
+}
+
+const normalizeContextPosition = (mouseX: number, mouseY: number) => {
+    const xNorm = mouseX + contextMenu.scrollWidth >= window.innerWidth
+        ? window.innerWidth - contextMenu.scrollWidth - 20
+        : mouseX;
+    const yNorm = mouseY + contextMenu.scrollHeight >= window.innerHeight
+        ? window.innerHeight - contextMenu.scrollHeight - 20
+        : mouseY;
+
+    return { xNorm, yNorm };
 }
 
 

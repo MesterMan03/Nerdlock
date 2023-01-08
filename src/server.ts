@@ -60,7 +60,7 @@ export class NerdServer {
             console.log(`[Nerdlock] Server successfully started on port ${this.config.port}`);
         });
 
-        this.app.use(cors({ origin: [this.config.origin], credentials: true }));
+        this.app.use(cors({ origin: "*", credentials: true }));
         this.app.use(express.json({ limit: 15_000_000 }));
         this.app.use(express.urlencoded({ limit: 15_000_000, extended: true }));
         this.app.use(compression({
