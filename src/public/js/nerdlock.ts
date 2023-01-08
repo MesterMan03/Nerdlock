@@ -6,7 +6,7 @@ globalThis.CryptoHelper = CryptoHelper;
 let client: NerdClient;
 let currentRoom: string;
 
-const dateFormat: Intl.DateTimeFormatOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: "numeric", minute: "numeric", second: "numeric" };
+const dateFormat: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'numeric', day: 'numeric', hour: "numeric", minute: "numeric", second: "numeric" };
 
 const messagesDiv = document.getElementById("messages") as HTMLDivElement;
 const roomsDiv = document.getElementById("rooms") as HTMLDivElement;
@@ -17,6 +17,7 @@ const contextMenu = document.getElementById("contextmenu") as HTMLDivElement;
 const messageInfo = document.getElementById("messageinfo") as HTMLTextAreaElement;
 
 let filesToUpload: NerdMessageFile[] = [];
+let replyingTo: string;
 
 (document.getElementById("homeserver") as HTMLInputElement).value = location.origin;
 
@@ -117,41 +118,53 @@ document.getElementById("createroom").onclick = async () => {
     reloadRooms();
 }
 
-async function sendMessage(event: MouseEvent | KeyboardEvent) {
+document.getElementById("replyingto").onclick = () => {
+    document.getElementById("replyingto").innerText = "";
+    replyingTo = null;
+}
+
+async function sendMessage() {
     if (!client) return;
 
     const room = client.rooms.get(currentRoom);
     if (!room) return;
 
-    if ((event instanceof KeyboardEvent && event.key === "Enter" && !event.shiftKey) || event instanceof MouseEvent) {
-        event.preventDefault();
+    const content = messageInput.innerText.trim();
+    if (content === "" && filesToUpload.length === 0) return;
 
-        const content = messageInput.innerText.trim();
-        if (content === "" && filesToUpload.length === 0) return;
+    const files: NerdMessageFile[] = [];
+    loadfiles: for (const f of filesToUpload) {
+        if (f.size > 10_000_000) // skip file if it's over 10 mb
+            continue;
 
-        const files: NerdMessageFile[] = [];
-        loadfiles: for (const f of filesToUpload) {
-            if (f.size > 10_000_000) // skip file if it's over 10 mb
-                continue;
+        if (files.map(f => f.size).reduce((prev, curr) => prev + curr, 0) > 10_000_000) // stop calculating files if total is already over 10 mb
+            break loadfiles;
 
-            if (files.map(f => f.size).reduce((prev, curr) => prev + curr, 0) > 10_000_000) // stop calculating files if total is already over 10 mb
-                break loadfiles;
+        files.push(f);
 
-            files.push(f);
-
-            if (files.map(f => f.size).reduce((prev, curr) => prev + curr, 0) > 10_000_000) // remove last file if total is already over 10 mb
-                files.pop();
-        }
-
-        filesToUpload = [];
-        filesDiv.innerText = "";
-        messageInput.innerText = "";
-        client.rooms.sendMessage(room.roomId, { text: content, files });
+        if (files.map(f => f.size).reduce((prev, curr) => prev + curr, 0) > 10_000_000) // remove last file if total is already over 10 mb
+            files.pop();
     }
+
+    filesToUpload = [];
+    filesDiv.innerText = "";
+    messageInput.innerText = "";
+    document.getElementById("replyingto").innerText = "";
+
+    client.rooms.sendMessage(room.roomId, { text: content, files, replyingTo });
+    replyingTo = null;
 }
 
-messageInput.addEventListener("keypress", sendMessage);
-document.getElementById("sendmessage").addEventListener("click", sendMessage);
+messageInput.addEventListener("keypress", (event) => {
+    if (event.key === "Enter" && !event.shiftKey) {
+        event.preventDefault();
+        sendMessage();
+    }
+});
+document.getElementById("sendmessage").addEventListener("click", (event) => {
+    event.preventDefault();
+    sendMessage();
+});
 
 document.getElementById("messageinput").addEventListener("paste", async (event: ClipboardEvent) => {
     if (event.clipboardData.files.length !== 0)
@@ -306,11 +319,44 @@ async function addMessage(message: NerdMessage, needInfo: boolean) {
 
     const author = await client.userStore.fetchUser(message.authorId);
     const messageDiv = document.createElement("div");
+    messageDiv.id = `message.${message.messageId}`;
     messageDiv.classList.add("message");
 
     if (!message.verified) messageDiv.classList.add("unverified");
 
-    if ((message.content?.files ?? []).length !== 0) needInfo = true;
+    if ((message.content.files ?? []).length !== 0) needInfo = true;
+    if (message.content.replyingTo) needInfo = true;
+
+    addReply: if (message.content.replyingTo) {
+        const repliedMessage = client.rooms.get(currentRoom).messages.find(m => m.messageId === message.content.replyingTo);
+
+        const reply = document.createElement("div");
+        reply.classList.add("reply");
+        if (!repliedMessage) {
+            reply.innerText = `Message couldn't be loaded`;
+            break addReply;
+        }
+
+        reply.onclick = () => {
+            const message = document.getElementById(`message.${repliedMessage.messageId}`);
+            messagesDiv.scroll({ top: message.offsetTop - 100, behavior: "smooth" });
+
+            message.classList.add("highlight");
+            setTimeout(() => {
+                message.classList.remove("highlight");
+            }, 800);
+        }
+
+        const author = await client.userStore.fetchUser(repliedMessage.authorId);
+        reply.innerText = `${author.username}: `;
+
+        if (repliedMessage.content.text)
+            reply.innerText += `${repliedMessage.content.text}`;
+        else if (repliedMessage.content.files?.length !== 0)
+            reply.innerText += `${repliedMessage.content.files.length} files uploaded`;
+
+        messageDiv.appendChild(reply);
+    }
 
     if (needInfo) {
         const messageInfo = document.createElement("p");
@@ -364,6 +410,11 @@ async function addMessage(message: NerdMessage, needInfo: boolean) {
         contextMenu.style.left = `${xNorm}px`;
         contextMenu.style.top = `${yNorm}px`;
         contextMenu.focus();
+
+        document.getElementById("replymessage").onclick = () => {
+            document.getElementById("replyingto").innerText = `Replying to ${author.username}`;
+            replyingTo = message.messageId;
+        }
 
         document.getElementById("showmessageinfo").onclick = () => {
             messageInfo.value = JSON.stringify(message);

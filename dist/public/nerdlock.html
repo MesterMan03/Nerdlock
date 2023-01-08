@@ -25,7 +25,11 @@
             </svg>
             <hr>
             <div id="rooms"></div>
-            <button id="createroom">+</button>
+            <svg class="icon" id="createroom" role="img" width="50" height="50" viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg">
+                <path d="M20 11.1111H12.8889V4H11.1111V11.1111H4V12.8889H11.1111V20H12.8889V12.8889H20V11.1111Z">
+                </path>
+            </svg>
             <svg id="showsettings" class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"
                 onclick="document.getElementById('settingscontainer').style.display='flex';">
                 <path
@@ -37,7 +41,7 @@
             <div id="user">
                 <h2>Account</h2>
                 <button id="closeuser" onclick="document.getElementById('usercontainer').style.display='none';">
-                    <svg class="icon" width="20" height="20" viewBox="0 0 24 24">
+                    <svg class="icon" width="20" height="20" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z">
                         </path>
@@ -60,7 +64,8 @@
         <main id="base">
             <div id="toolbar">
                 <p id="roomname">Loading...</p>
-                <svg id="togglemembers" class="icon" x="0" y="0" role="img" width="24" height="24" viewBox="0 0 24 24">
+                <svg id="togglemembers" class="icon" x="0" y="0" role="img" width="24" height="24" viewBox="0 0 24 24"
+                    xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" clip-rule="evenodd"
                         d="M14 8.00598C14 10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 15.473 18 19.006V20.006H2V19.006Z">
                     </path>
@@ -79,6 +84,8 @@
                 <button id="loadprev">Load previous messages</button>
                 <div id="messages"></div>
                 <div id="messagebox">
+                    <div id="replyingto"></div>
+                    <hr>
                     <div id="files"></div>
                     <hr>
                     <div class="textarea">
@@ -107,27 +114,30 @@
             <button id="invitemember">Invite member</button>
         </div>
         <div id="contextmenu">
-            <p id="replymessage">Reply (not available yet)</p>
+            <p id="replymessage">Reply</p>
             <p id="deletemessage">Delete (not available yet)</p>
             <p id="showmessageinfo">View Source</p>
             <p id="copymessageid">Copy Message ID</p>
         </div>
         <textarea id="messageinfo" readonly="true"></textarea>
         <div id="settingscontainer" style="display: none;">
-            <div id="settings">
+            <div id="settingsbar">
                 <button onclick="document.getElementById('settingscontainer').style.display='none';">
-                    <svg class="icon" width="20" height="20" viewBox="0 0 24 24">
+                    <svg class="icon" width="50" height="50" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path
                             d="M18.4 4L12 10.4L5.6 4L4 5.6L10.4 12L4 18.4L5.6 20L12 13.6L18.4 20L20 18.4L13.6 12L20 5.6L18.4 4Z">
                         </path>
                     </svg>
                 </button>
+            </div>
+            <div id="settings">
                 <p class="settingname">Security</p>
                 <ol>
                     <p class="setting" id="enabletotp">Enable TOTP 2FA</p>
                     <p class="setting" id="enableu2f">Add U2F key (under development)</p>
                 </ol>
             </div>
+        </div>
         </div>
         <script src="/js/nerdlock.js" type="module"></script>
     </body>
