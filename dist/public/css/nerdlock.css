@@ -74,7 +74,8 @@ body {
 }
 
 #navigator button,
-#navigator svg {
+#createroom,
+#showsettings {
     width: 100%;
     aspect-ratio: 1/1;
 
@@ -288,7 +289,7 @@ body {
 
 #settings>ol>p {
     padding: 5px;
-    color:  var(--white);
+    color: var(--white);
 
     cursor: pointer;
 }
@@ -396,19 +397,41 @@ body {
 }
 
 .message * {
-    word-break: break-all;
+    word-break: break-word;
+    white-space: break-spaces;
 }
 
-.message .messageinfo {
+.message.highlight {
+    transition: background-color 0.3s ease;
+    background-color: var(--column-colour);
+}
+
+.messageinfo {
     display: flex;
     justify-content: space-between;
     gap: 5px;
 
     margin-top: 8px;
+    color: var(--light-brand-colour);
 }
 
-.messageinfo {
-    color: var(--light-brand-colour);
+.reply+.messageinfo {
+    margin-top: 0px;
+}
+
+.reply {
+    margin-top: 8px;
+    color: var(--white);
+
+    cursor: pointer;
+
+    transition: color 0.2s ease;
+
+    font-size: 0.8rem;
+}
+
+.reply:hover {
+    color: var(--grey);
 }
 
 .date {
