@@ -18,6 +18,7 @@ const messageInfo = document.getElementById("messageinfo") as HTMLTextAreaElemen
 
 let filesToUpload: NerdMessageFile[] = [];
 let replyingTo: string;
+let loadingRoom: boolean = false;
 
 (document.getElementById("homeserver") as HTMLInputElement).value = location.origin;
 
@@ -50,6 +51,7 @@ document.getElementById("authform").addEventListener("submit", async (event) => 
     const newClient = type === "login" ? await NerdClient.login(homeServer, username, password, { totp: totp === "" ? undefined : totp }) : await NerdClient.register(homeServer, username, password);
     if (!newClient) {
         document.getElementById("authform").style.display = "flex";
+        document.getElementById("userid").style.display = "none";
         alert("Failed to authenticate, please check the console");
         return;
     }
@@ -251,8 +253,12 @@ window.addEventListener("nerdlock.newMessage", (event: CustomEvent<NerdMessage>)
     const room = client.rooms.get(currentRoom);
     if (!room || currentRoom !== event.detail.roomId) return;
 
-    addMessage(event.detail, room.messages[room.messages.findIndex(m => m.messageId === event.detail.messageId) - 1]?.authorId !== event.detail.authorId).then(() => {
-        scrollToBottom();
+    room.messages = room.messages.sort((a, b) => a.createdAt - b.createdAt);
+
+    addMessage(event.detail, shouldAddInfo(room.messages, event.detail)).then(() => {
+        // only scroll down, if the user is already scrolled down (the plus 50 is added so a small scroll will still trigger)
+        if (messagesDiv.scrollTop + messagesDiv.clientHeight + 50 >= messagesDiv.scrollHeight)
+            scrollToBottom();
     });
 });
 
@@ -278,20 +284,27 @@ async function reloadRooms() {
         roomsDiv.appendChild(button);
 
         button.onclick = async () => {
+            if (loadingRoom) return;
+
+            loadingRoom = true;
+            document.getElementById("roomname").innerText = "Loading room, please wait...";
+
             if (currentRoom === room.roomId) return;
             currentRoom = room.roomId;
 
             const realRoom = client.rooms.get(currentRoom);
 
-            document.getElementById("roomname").innerText = realRoom.name;
-
             messagesDiv.innerHTML = "";
 
-            reloadMembers();
+            await reloadMembers();
             await client.rooms.loadMessages(realRoom.roomId, { after: realRoom.messages.slice(-1)[0]?.createdAt });
-            await Promise.all(realRoom.messages.map((m, index, self) => addMessage(m, self[index - 1]?.authorId !== m.authorId)));
+            for (const m of realRoom.messages) {
+                await addMessage(m, shouldAddInfo(realRoom.messages, m));
+            }
 
             messagesDiv.scrollTop = messagesDiv.scrollHeight;
+            loadingRoom = false;
+            document.getElementById("roomname").innerText = realRoom.name;
         }
     }
 }
@@ -466,7 +479,9 @@ async function loadPrevMessages() {
     const currentScroll = messagesDiv.scrollHeight - messagesDiv.clientHeight - messagesDiv.scrollTop;
 
     messagesDiv.innerHTML = "";
-    await Promise.all(room.messages.map((m, index, self) => addMessage(m, self[index - 1]?.authorId !== m.authorId)));
+    for (const m of room.messages) {
+        await addMessage(m, shouldAddInfo(room.messages, m));
+    }
 
     messagesDiv.scrollTop = messagesDiv.scrollHeight - messagesDiv.clientHeight - currentScroll;
 }
@@ -477,6 +492,13 @@ function createPopup() {
     document.body.appendChild(popup);
 
     return popup;
+}
+
+function shouldAddInfo(messages: NerdMessage[], message: NerdMessage, index?: number) {
+    const previous = messages[index ? (index - 1) : (messages.findIndex(m => m.messageId === message.messageId) - 1)];
+    if (!previous) return true;
+
+    return message.authorId !== previous.authorId || (message.createdAt - previous.createdAt) > 5 * 60 * 1000; // if there are 5 minutes between the two messages, include info again
 }
 
 const normalizeContextPosition = (mouseX: number, mouseY: number) => {

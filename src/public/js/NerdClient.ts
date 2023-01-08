@@ -1,5 +1,5 @@
 /* 
-Official client for NerdLock by Mester
+Official client for Nerdlock by Mester
 Feel free to copy this code and potentially use it for your own custom client, I guess
 Anyway, enough talk, have fun looking at my "amazing" code
 */
@@ -10,17 +10,17 @@ import NerdUtils from "./NerdUtils.js";
 
 /* Constans */
 /**
- * NerdLock server versions the client should accept
+ * Nerdlock server versions the client should accept
  */
-const acceptVersions = ["1.0.2"];
+const acceptVersions = ["b1.0.3"];
 
 /**
- * The main entry point of the NerdLock API
+ * The main entry point of the Nerdlock API
  */
 const APIBase = "/_nerdlock";
 
 /**
- * NerdLock API endpoints
+ * Nerdlock API endpoints
  */
 const APIEndpoints = {
     info: APIBase + "/info",
@@ -606,15 +606,6 @@ class RoomManager {
 
             const data: { messages: NerdRawMessage[] } = await r.json();
 
-            // load users
-            let fetches: Array<Promise<NerdPublicUser>> = [];
-            for (const userId of data.messages.map(m => m.authorId).filter((value, index, self) =>
-                index === self.findIndex(t => t === value)
-            )) {
-                fetches.push(this.#client.userStore.fetchUser(userId))
-            }
-            await Promise.all(fetches);
-
             // decrypt messages
             const key = await CryptoHelper.keyFromUint(CryptoHelper.enc.StringToUint(room.secret, "base64"));
 
@@ -1029,14 +1020,14 @@ class UserStore {
         const user = this.#users.get(userId);
         if (!user) return;
 
-        if (newUser.online) user.online = newUser.online;
+        if (typeof newUser.online === "boolean") user.online = newUser.online;
 
         window.dispatchEvent(new CustomEvent("nerdlock.userSync"));
     }
 }
 
 /**
- * Static function for creating a NerdLock client
+ * Static function for creating a Nerdlock client
  * @param domain The domain name of the g
  */
 async function createClient(domain: string) {
@@ -1049,11 +1040,11 @@ async function createClient(domain: string) {
             .then(r => { return r.json(); })
             .catch(err => {
                 console.log(err);
-                throw new Error("Couldn't fetch NerdLock server info (perhaps a bad domain or host is down)")
+                throw new Error("Couldn't fetch Nerdlock server info (perhaps a bad domain or host is down)")
             });
 
         if (!serverInfo.version || !acceptVersions.includes(serverInfo.version)) {
-            throw new Error("Couldn't verify NerdLock server version (it either doesn't exist or it's not allowed by the client)");
+            throw new Error("Couldn't verify Nerdlock server version (it either doesn't exist or it's not allowed by the client)");
         }
 
         const client = new NerdClient(serverUrl.origin);

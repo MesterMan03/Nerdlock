@@ -43,8 +43,9 @@ export default async function register(req: Request, res: Response) {
 
         clearInterval(heartBeat);
     });
-
-    updatePresence(req, true);
+    
+    if (sseSessions.get(req.lockUser.userId).length === 1)
+        updatePresence(req, true);
 }
 
 async function updatePresence(req: Request, online: boolean) {
