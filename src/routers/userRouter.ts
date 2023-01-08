@@ -10,10 +10,15 @@ import { nerdServer } from "../index.js";
 import { sseSessions } from "../sse.js";
 import { NerdSecretRequest, NerdUserSecretMessage } from "../types.js";
 import { authUser, generateAccessToken, sanitizeUser, verifyReq } from "../utils.js";
+import rateLimit from "express-rate-limit";
 
 const router = Router();
 
-router.get("/:userId", authUser, async (req, res) => {
+router.get("/:userId", rateLimit({
+    windowMs: 60000,
+    max: 60,
+    standardHeaders: true
+}), authUser, async (req, res) => {
     try {
         req.lockUser.rooms = undefined;
         if (req.params.userId === "me")
@@ -57,7 +62,11 @@ const userPatchSchema = yup.object({
         })).notRequired()
     })
 })
-router.patch("/", authUser, verifyReq(userPatchSchema), async (req, res) => {
+router.patch("/", rateLimit({
+    windowMs: 60000,
+    max: 5,
+    standardHeaders: true
+}), authUser, verifyReq(userPatchSchema), async (req, res) => {
     const user = await User.findOne({ userId: req.lockUser.userId });
 
     try {
@@ -73,7 +82,11 @@ router.patch("/", authUser, verifyReq(userPatchSchema), async (req, res) => {
     }
 });
 
-router.get("/:userId/x3dh", authUser, async (req, res) => {
+router.get("/:userId/x3dh", rateLimit({
+    windowMs: 60000,
+    max: 5,
+    standardHeaders: true
+}), authUser, async (req, res) => {
     const userId = req.params.userId;
     const user = await User.findOne({ userId });
     if (!user) return res.sendStatus(404);
@@ -103,7 +116,11 @@ const secretReqSchema = yup.object({
         otKeyId: yup.number().min(0).max(100).integer()
     })
 })
-router.post("/:userId/secretRequest", authUser, verifyReq(secretReqSchema), async (req, res) => {
+router.post("/:userId/secretRequest", rateLimit({
+    windowMs: 60000,
+    max: 5,
+    standardHeaders: true
+}), authUser, verifyReq(secretReqSchema), async (req, res) => {
     const from = req.lockUser.userId;
     const to = req.params.userId;
 
@@ -142,7 +159,11 @@ const secretMessageSchema = yup.object({
         message: yup.string().required()
     })
 })
-router.post("/:userId/secretMessage", authUser, verifyReq(secretMessageSchema), async (req, res) => {
+router.post("/:userId/secretMessage", rateLimit({
+    windowMs: 60000,
+    max: 5,
+    standardHeaders: true
+}), authUser, verifyReq(secretMessageSchema), async (req, res) => {
     const user = await User.findOne({ userId: req.params.userId });
     if (!user)
         return res.status(404).json({ error: "User was not found" });
@@ -175,7 +196,11 @@ const loginSchema = yup.object({
         }).notRequired()
     })
 })
-router.post("/login", verifyReq(loginSchema), async (req, res) => {
+router.post("/login", rateLimit({
+    windowMs: 60000,
+    max: 2,
+    standardHeaders: true
+}), verifyReq(loginSchema), async (req, res) => {
     const username = String(req.body.username);
     const password = String(req.body.password);
 
@@ -203,7 +228,7 @@ router.post("/login", verifyReq(loginSchema), async (req, res) => {
     }
 
     res.json(await sanitizeUser(user));
-    
+
     user.usedOneTimeKeys = user.secretMessages = user.secretRequests = [];
     await user.save();
 });
@@ -231,7 +256,11 @@ const registerSchema = yup.object({
         })
     })
 })
-router.post("/register", verifyReq(registerSchema), async (req, res) => {
+router.post("/register", rateLimit({
+    windowMs: 60000,
+    max: 2,
+    standardHeaders: true
+}), verifyReq(registerSchema), async (req, res) => {
     if (!nerdServer.config.allowReg)
         return res.status(405).json({ error: "Registering is disabled on this server" });
 
@@ -286,7 +315,11 @@ const totpRegisterSchema = yup.object({
         challenge: yup.string().notRequired()
     })
 })
-router.post("/mfa/totp", authUser, verifyReq(totpRegisterSchema), async (req, res) => {
+router.post("/mfa/totp", rateLimit({
+    windowMs: 60000,
+    max: 2,
+    standardHeaders: true
+}), authUser, verifyReq(totpRegisterSchema), async (req, res) => {
     try {
         let mfa = await MFA.findOne({ userId: req.lockUser.userId });
         if (!mfa) mfa = await MFA.create({ userId: req.lockUser.userId });
@@ -325,7 +358,11 @@ router.post("/mfa/totp", authUser, verifyReq(totpRegisterSchema), async (req, re
     }
 });
 
-router.get("/mfa/regU2F", authUser, async (req, res) => {
+router.get("/mfa/regU2F", rateLimit({
+    windowMs: 60000,
+    max: 1,
+    standardHeaders: true
+}), authUser, async (req, res) => {
     return res.status(501).send({ error: "Under development" });
     try {
         let mfa = await MFA.findOne({ userId: req.lockUser.userId });
@@ -363,7 +400,11 @@ const u2fRegisterSchema = yup.object({
         }).required()
     })
 })
-router.post("/mfa/regU2F", authUser, verifyReq(u2fRegisterSchema), async (req, res) => {
+router.post("/mfa/regU2F", rateLimit({
+    windowMs: 60000,
+    max: 1,
+    standardHeaders: true
+}), authUser, verifyReq(u2fRegisterSchema), async (req, res) => {
     return res.status(501).send({ error: "Under development" });
     try {
         let mfa = await MFA.findOne({ userId: req.lockUser.userId });

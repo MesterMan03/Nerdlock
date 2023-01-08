@@ -412,20 +412,23 @@ async function addMessage(message: NerdMessage, needInfo: boolean) {
         contextMenu.focus();
 
         document.getElementById("replymessage").onclick = () => {
+            contextMenu.classList.remove("visible");
+
             document.getElementById("replyingto").innerText = `Replying to ${author.username}`;
             replyingTo = message.messageId;
         }
 
         document.getElementById("showmessageinfo").onclick = () => {
-            messageInfo.value = JSON.stringify(message);
             contextMenu.classList.remove("visible");
 
+            messageInfo.value = JSON.stringify(message);
             setTimeout(() => messageInfo.classList.add("visible"), 100);
         }
 
         document.getElementById("copymessageid").onclick = () => {
-            navigator.clipboard.writeText(message.messageId);
             contextMenu.classList.remove("visible");
+
+            navigator.clipboard.writeText(message.messageId);
         }
     })
 
