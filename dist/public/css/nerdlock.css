@@ -215,13 +215,10 @@ body {
 }
 
 #settingscontainer {
-    flex: 1;
-
     height: 100%;
     width: 100%;
 
     position: absolute;
-    display: flex;
     flex-direction: column;
 
     background-color: var(--background);
@@ -237,6 +234,7 @@ body {
     padding-bottom: 20px;
 
     background-color: var(--column-colour);
+
     text-align: center;
 }
 
@@ -290,12 +288,18 @@ body {
 
 #settings>ol>p {
     padding: 5px;
+    color:  var(--white);
 
     cursor: pointer;
 }
 
 #settings>ol>p:hover {
-    background-color: var(--grey);
+    background-color: var(--light-brand-colour);
+}
+
+.settingname {
+    font-weight: bold;
+    color: var(--light-brand-colour);
 }
 
 .settingname {
