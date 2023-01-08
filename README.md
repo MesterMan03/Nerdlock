@@ -1,4 +1,5 @@
 # Nerdlock - Simple E2EE messaging app
+Official instance can be found at: https://nerd.mester.info
 
 ## Overview
 Nerdlock is an E2EE messaging app running on Express and using MongoDB as a database.
