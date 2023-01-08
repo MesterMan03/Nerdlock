@@ -22,4 +22,4 @@ A "vulnerability in Nerdlock" is a vulnerability in the official code distribute
 
 If you believe you've identified a security vulnerability in Nerdlock, you can inform Mester at <MesterMan03+nerdlock@proton.me> or report it on Github at https://github.com/MesterMan03/Nerdlock/security/advisories.
 
-Please do *not* report such issues on GitHub or in other public spaces to give us time to publish a fix for the issue.
+Please do *not* report such issues using GitHub Issues or in other public spaces to give us time to publish a fix for the issue.
