@@ -8,3 +8,4 @@ conf.toml
 package-lock.json
 *.pem
 ssl
+.vscode
