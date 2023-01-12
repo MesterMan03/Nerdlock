@@ -51,7 +51,6 @@ document.getElementById("authform").addEventListener("submit", async (event) => 
     const newClient = type === "login" ? await NerdClient.login(homeServer, username, password, { totp: totp === "" ? undefined : totp }) : await NerdClient.register(homeServer, username, password);
     if (!newClient) {
         document.getElementById("authform").style.display = "flex";
-        document.getElementById("userid").style.display = "none";
         alert("Failed to authenticate, please check the console");
         return;
     }
