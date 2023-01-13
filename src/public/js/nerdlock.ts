@@ -38,27 +38,29 @@ document.addEventListener("click", (e) => {
 document.getElementById("authform").addEventListener("submit", async (event) => {
     event.preventDefault();
 
-    document.getElementById("authform").style.display = "none";
-
-    document.getElementById("userid").innerText = "Loading...";
+    document.getElementById("authinfo").innerText = "Loading...";
 
     const homeServer = (document.getElementById("homeserver") as HTMLInputElement).value;
     const username = (document.getElementById("username") as HTMLInputElement).value;
     const password = (document.getElementById("password") as HTMLInputElement).value;
+    const passwordConf = (document.getElementById("passwordconf") as HTMLInputElement).value;
     const totp = (document.getElementById("totpcode") as HTMLInputElement).value;
-    const type = (document.getElementById("authtype") as HTMLSelectElement).value;
+
+    const type = document.querySelector("#login:checked") ? "login" : "register";
+
+    if (type === "register" && (password !== passwordConf))
+        return alert("Passwords don't match");
+
 
     const newClient = type === "login" ? await NerdClient.login(homeServer, username, password, { totp: totp === "" ? undefined : totp }) : await NerdClient.register(homeServer, username, password);
-    if (!newClient) {
-        document.getElementById("authform").style.display = "flex";
-        alert("Failed to authenticate, please check the console");
-        return;
-    }
+    if (!newClient)
+        return alert("Failed to authenticate, please check the console");
+
     else client = newClient;
 
     document.getElementById("userid").innerText = `User ID: ${client.user.userId}`;
 
-    document.getElementById("usercontainer").style.display = "none";
+    document.getElementById("authcontainer").remove();
     reloadRooms();
 });
 
@@ -162,10 +164,6 @@ messageInput.addEventListener("keypress", (event) => {
         sendMessage();
     }
 });
-document.getElementById("sendmessage").addEventListener("click", (event) => {
-    event.preventDefault();
-    sendMessage();
-});
 
 document.getElementById("messageinput").addEventListener("paste", async (event: ClipboardEvent) => {
     if (event.clipboardData.files.length !== 0)
@@ -198,6 +196,21 @@ document.getElementById("room").ondrop = async function (event: DragEvent) {
     }
 };
 
+
+messagesDiv.addEventListener("scroll", () => {
+    if (messagesDiv.scrollTop === 0) {
+        loadPrevMessages();
+    }
+});
+
+//#region buttons in the HTML
+document.getElementById("sendmessage").addEventListener("click", (event) => {
+    event.preventDefault();
+    sendMessage();
+});
+
+document.getElementById("loadprev").addEventListener("click", loadPrevMessages);
+
 document.getElementById("invitemember").addEventListener("click", async () => {
     if (!client) return;
 
@@ -209,14 +222,6 @@ document.getElementById("invitemember").addEventListener("click", async () => {
 
     client.rooms.inviteUser(room.roomId, userId);
 });
-
-messagesDiv.addEventListener("scroll", () => {
-    if (messagesDiv.scrollTop === 0) {
-        loadPrevMessages();
-    }
-});
-
-document.getElementById("loadprev").addEventListener("click", loadPrevMessages);
 
 document.getElementById("togglemembers").addEventListener("click", () => {
     if (membersDiv.style.display == "none") membersDiv.style.display = "block";
@@ -247,6 +252,23 @@ document.getElementById("uploadfile").addEventListener("click", () => {
 
     input.click();
 });
+
+document.getElementById("showaccount").addEventListener("click", () => {
+    document.getElementById("accountcontainer").style.display = "flex";
+});
+
+document.getElementById("closeuser").addEventListener("click", () => {
+    document.getElementById("accountcontainer").style.display = "none";
+});
+
+document.getElementById("showsettings").addEventListener("click", () => {
+    document.getElementById("settingscontainer").style.display = "flex";
+});
+
+document.getElementById("closesettings").addEventListener("click", () => {
+    document.getElementById("settingscontainer").style.display = "none";
+});
+//#endregion
 
 window.addEventListener("nerdlock.newMessage", (event: CustomEvent<NerdMessage>) => {
     const room = client.rooms.get(currentRoom);
@@ -285,11 +307,11 @@ async function reloadRooms() {
         button.onclick = async () => {
             if (loadingRoom) return;
 
-            loadingRoom = true;
-            document.getElementById("roomname").innerText = "Loading room, please wait...";
-
             if (currentRoom === room.roomId) return;
             currentRoom = room.roomId;
+
+            loadingRoom = true;
+            document.getElementById("roomname").innerText = "Loading room, please wait...";
 
             const realRoom = client.rooms.get(currentRoom);
 

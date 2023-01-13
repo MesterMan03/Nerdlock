@@ -129,11 +129,107 @@ body {
     margin-bottom: 1.5px;
 }
 
-#authform {
+#authcontainer {
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    width: 100%;
+    height: 100%;
+
     display: flex;
-    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    background-color: var(--bar-colour);
+}
+
+#authform {
+    padding: 10px;
+    border-radius: 1em;
+
+    background-color: var(--background);
+
+    display: grid;
+    grid-template-areas:
+        "log reg"
+        "hs hs"
+        "un un"
+        "pw pw"
+        "pwc pwc"
+        "totp totp"
+        "sb sb"
+        "info info";
 
     gap: 2px;
+}
+
+#authform>input[type="radio"] {
+    display: none;
+    appearance: none;
+    margin: 0;
+    user-select: none;
+}
+
+#authform>label {
+    padding: 10px;
+
+    color: var(--white);
+    text-align: center;
+
+    transition: background-color 0.2s ease-out;
+}
+
+#authform>label:hover {
+    background-color: var(--grey);
+}
+
+#authform>input[type="radio"]:checked+label {
+    background-color: var(--grey);
+}
+
+#login+label {
+    grid-area: log;
+}
+
+#register+label {
+    grid-area: reg;
+}
+
+#homeserver {
+    grid-area: hs;
+}
+
+#username {
+    grid-area: un;
+}
+
+#password {
+    grid-area: pw;
+}
+
+#passwordconf {
+    grid-area: pwc;
+}
+
+#totpcode {
+    grid-area: totp;
+}
+
+#authform>input[type="submit"] {
+    grid-area: sb;
+}
+
+#authinfo {
+    grid-area: info;
+}
+
+#login:checked~#passwordconf {
+    display: none;
+    appearance: none;
+    visibility: hidden;
+
+    grid-area: unset;
 }
 
 #authform>input,
@@ -144,7 +240,7 @@ body {
 
     padding: 5px;
 
-    background-color: var(--background);
+    background-color: var(--column-colour);
 
     color: var(--white);
 }
@@ -153,18 +249,23 @@ body {
     color: var(--grey);
 }
 
-#usercontainer {
+#accountcontainer {
     width: 100%;
     height: 100%;
 
     position: absolute;
-    display: flex;
+    left: 0;
+    top: 0;
+
+    display: none;
     justify-content: center;
     align-items: center;
 
+    background-color: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(7px);
 }
 
-#user {
+#account {
     width: fit-content;
     border-radius: 0.25em;
     background-color: var(--bar-colour);
@@ -178,12 +279,12 @@ body {
     position: relative;
 }
 
-#user>h2 {
+#account>h2 {
     color: var(--white);
     margin: 35px;
 }
 
-#user>button {
+#account>button {
     position: absolute;
     right: 10px;
     top: 10px;
@@ -206,13 +307,6 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
-}
-
-#userinfo {
-    flex-direction: column;
-    justify-content: flex-start;
-
-    position: relative;
 }
 
 #settingscontainer {

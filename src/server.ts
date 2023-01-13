@@ -12,6 +12,7 @@ import { ServerConfig } from "./types.js";
 import compression from "compression";
 import session from "express-session";
 import { Fido2Lib } from "fido2-lib";
+import expressCSP from "express-csp-header";
 
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
@@ -56,19 +57,28 @@ export class NerdServer {
     }
 
     setupExpress() {
-        this.server.listen(this.config.port, () => {
-            console.log(`[Nerdlock] Server successfully started on port ${this.config.port}`);
-        });
-
         this.app.use(cors({ origin: "*", credentials: true }));
+
         this.app.use(express.json({ limit: 15_000_000 }));
         this.app.use(express.urlencoded({ limit: 15_000_000, extended: true }));
+
         this.app.use(compression({
             filter: (req, res) => {
                 if (req.accepts("text/event-stream")) return false;
                 return true;
             }
         }));
+
+        this.app.use(expressCSP.expressCspHeader({
+            directives: {
+                "default-src": [expressCSP.SELF],
+                "script-src": [expressCSP.SELF],
+                "style-src": [expressCSP.SELF, expressCSP.INLINE],
+                "img-src": [expressCSP.SELF, expressCSP.DATA],
+                "connect-src": ["*"]
+            }
+        }))
+
         this.app.set("trust proxy", 1);
         this.app.use(session({
             secret: this.config.dbSecret,
@@ -83,8 +93,8 @@ export class NerdServer {
             saveUninitialized: false
         }))
 
-        // apply a random uuid to each request
         this.app.use((req, res, next) => {
+            // apply a random uuid to each request
             req.reqId = randomUUID();
             next();
         });
@@ -98,6 +108,10 @@ export class NerdServer {
             res.status(404);
 
             res.json({ error: "You were looking so hard, you accidentally found nothing." });
-        })
+        });
+
+        this.server.listen(this.config.port, () => {
+            console.log(`[Nerdlock] Server successfully started on port ${this.config.port}`);
+        });
     }
 }
