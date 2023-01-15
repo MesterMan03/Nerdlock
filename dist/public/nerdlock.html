@@ -5,14 +5,13 @@
         <title>Nerdlock official client</title>
         <meta charset="UTF-8">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <link rel="stylesheet" href="/css/nerdlock.css">
-        <link rel="manifest" href="/manifest.webmanifest">
-        <link rel="icon" type="image/x-icon" href="/favicon.ico">
+        <link rel="stylesheet" href="css/nerdlock.css">
+        <link rel="manifest" href="manifest.webmanifest">
+        <link rel="icon" type="image/x-icon" href="favicon.ico">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="application-name" content="Nerdlock">
         <meta name="author" content="Mester">
         <meta name="description" content="Simple-to-use E2EE messaging app designed to be secure and private">
-        <!-- script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js" defer></script -->
     </head>
 
     <body>
@@ -24,8 +23,7 @@
             </svg>
             <hr>
             <div id="rooms"></div>
-            <svg class="icon" id="createroom" role="img" width="50" height="50" viewBox="0 0 24 24"
-                xmlns="http://www.w3.org/2000/svg">
+            <svg class="icon" id="createroom" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path d="M20 11.1111H12.8889V4H11.1111V11.1111H4V12.8889H11.1111V20H12.8889V12.8889H20V11.1111Z">
                 </path>
             </svg>
@@ -55,7 +53,7 @@
                 <input type="radio" name="authtype" id="register" value="register">
                 <label for="register">Register</label>
 
-                <input id="homeserver" placeholder="Home server" value="https://nerd.mester.info" required>
+                <input id="homeserver" placeholder="Home server" required>
                 <input id="username" placeholder="Username" required>
                 <input type="password" id="password" placeholder="Password" required>
                 <input type="password" id="passwordconf" placeholder="Confirm password">
@@ -64,50 +62,59 @@
                 <p id="authinfo"></p>
             </form>
         </div>
-        <main id="base">
-            <div id="toolbar">
-                <p id="roomname"></p>
-                <svg id="togglemembers" class="icon" x="0" y="0" role="img" width="24" height="24" viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <path fill-rule="evenodd" clip-rule="evenodd"
-                        d="M14 8.00598C14 10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 15.473 18 19.006V20.006H2V19.006Z">
-                    </path>
-                    <path fill-rule="evenodd" clip-rule="evenodd"
-                        d="M14 8.00598C14 10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 15.473 18 19.006V20.006H2V19.006Z">
-                    </path>
-                    <path
-                        d="M20.0001 20.006H22.0001V19.006C22.0001 16.4433 20.2697 14.4415 17.5213 13.5352C19.0621 14.9127 20.0001 16.8059 20.0001 19.006V20.006Z">
-                    </path>
-                    <path
-                        d="M14.8834 11.9077C16.6657 11.5044 18.0001 9.9077 18.0001 8.00598C18.0001 5.96916 16.4693 4.28218 14.4971 4.0367C15.4322 5.09511 16.0001 6.48524 16.0001 8.00598C16.0001 9.44888 15.4889 10.7742 14.6378 11.8102C14.7203 11.8418 14.8022 11.8743 14.8834 11.9077Z">
-                    </path>
-                </svg>
-            </div>
-            <div id="room">
-                <button id="loadprev">Load previous messages</button>
-                <div id="messages"></div>
-                <div id="messagebox">
-                    <div id="replyingto"></div>
-                    <hr>
-                    <div id="files"></div>
-                    <hr>
-                    <div class="textarea">
-                        <div role="textbox" id="messageinput" aria-placeholder="Type your message here"
-                            aria-label="Input box for your message" contenteditable="true"></div>
-                        <svg id="uploadfile" class="icon" alt="File upload button" xmlns="http://www.w3.org/2000/svg"
-                            view Box="0 0 24 24">
+        <div id="roomwrapper">
+            <main id="roomcontent">
+                <div id="toolbar">
+                    <svg id="closeroom" class="icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 219.151 219.151">
+                        <g>
                             <path
-                                d="M14,2L20,8V20C20,21.1 19.1,22 18,22H6C4.9,22 4,21.1 4,20V4C4,2.9 4.9,2 6,2H14M18,20V9H13V4H6V20H18M12,12L16,16H13.5V19H10.5V16H8L12,12Z" />
-                        </svg>
-                        <svg id="sendmessage" class="icon" alt="Message send button" xmlns="http://www.w3.org/2000/svg"
-                            viewBox="0 0 24 24">
-                            <path d="M3,20V4L22,12M5,17L16.85,12L5,7V10.5L11,12L5,13.5M5,17V7Z" />
-                        </svg>
+                                d="M109.576,219.151c60.419,0,109.573-49.156,109.573-109.576C219.149,49.156,169.995,0,109.576,0S0.002,49.156,0.002,109.575   C0.002,169.995,49.157,219.151,109.576,219.151z M109.576,15c52.148,0,94.573,42.426,94.574,94.575   c0,52.149-42.425,94.575-94.574,94.576c-52.148-0.001-94.573-42.427-94.573-94.577C15.003,57.427,57.428,15,109.576,15z" />
+                            <path
+                                d="M94.861,156.507c2.929,2.928,7.678,2.927,10.606,0c2.93-2.93,2.93-7.678-0.001-10.608l-28.82-28.819l83.457-0.008   c4.142-0.001,7.499-3.358,7.499-7.502c-0.001-4.142-3.358-7.498-7.5-7.498l-83.46,0.008l28.827-28.825   c2.929-2.929,2.929-7.679,0-10.607c-1.465-1.464-3.384-2.197-5.304-2.197c-1.919,0-3.838,0.733-5.303,2.196l-41.629,41.628   c-1.407,1.406-2.197,3.313-2.197,5.303c0.001,1.99,0.791,3.896,2.198,5.305L94.861,156.507z" />
+                        </g>
+                    </svg>
+                    <p id="roomname"></p>
+                    <svg id="showmembers" class="icon" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M14 8.00598C14 10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 15.473 18 19.006V20.006H2V19.006Z">
+                        </path>
+                        <path fill-rule="evenodd" clip-rule="evenodd"
+                            d="M14 8.00598C14 10.211 12.206 12.006 10 12.006C7.795 12.006 6 10.211 6 8.00598C6 5.80098 7.794 4.00598 10 4.00598C12.206 4.00598 14 5.80098 14 8.00598ZM2 19.006C2 15.473 5.29 13.006 10 13.006C14.711 13.006 18 15.473 18 19.006V20.006H2V19.006Z">
+                        </path>
+                        <path
+                            d="M20.0001 20.006H22.0001V19.006C22.0001 16.4433 20.2697 14.4415 17.5213 13.5352C19.0621 14.9127 20.0001 16.8059 20.0001 19.006V20.006Z">
+                        </path>
+                        <path
+                            d="M14.8834 11.9077C16.6657 11.5044 18.0001 9.9077 18.0001 8.00598C18.0001 5.96916 16.4693 4.28218 14.4971 4.0367C15.4322 5.09511 16.0001 6.48524 16.0001 8.00598C16.0001 9.44888 15.4889 10.7742 14.6378 11.8102C14.7203 11.8418 14.8022 11.8743 14.8834 11.9077Z">
+                        </path>
+                    </svg>
+                </div>
+                <div id="room">
+                    <button id="loadprev">Load previous messages</button>
+                    <div id="messages"></div>
+                    <div id="messagebox">
+                        <div id="replyingto"></div>
+                        <hr>
+                        <div id="files"></div>
+                        <hr>
+                        <div class="textarea">
+                            <div role="textbox" id="messageinput" aria-placeholder="Type your message here"
+                                aria-label="Input box for your message" contenteditable="true"></div>
+                            <svg id="uploadfile" class="icon" alt="File upload button" xmlns="http://www.w3.org/2000/svg"
+                                view Box="0 0 24 24">
+                                <path
+                                    d="M14,2L20,8V20C20,21.1 19.1,22 18,22H6C4.9,22 4,21.1 4,20V4C4,2.9 4.9,2 6,2H14M18,20V9H13V4H6V20H18M12,12L16,16H13.5V19H10.5V16H8L12,12Z" />
+                            </svg>
+                            <svg id="sendmessage" class="icon" alt="Message send button" xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24">
+                                <path d="M3,20V4L22,12M5,17L16.85,12L5,7V10.5L11,12L5,13.5M5,17V7Z" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </main>
-        <div id="members" style="display: none;">
+            </main>
+        </div>
+        <div id="members">
             <p>Online</p>
             <div id="members.online"></div>
 
@@ -140,7 +147,6 @@
                     <p class="setting" id="enableu2f">Add U2F key (under development)</p>
                 </ol>
             </div>
-        </div>
         </div>
         <script src="/js/nerdlock.js" type="module"></script>
     </body>

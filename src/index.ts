@@ -6,7 +6,7 @@ import { NerdServer } from "./server.js";
 import { ServerConfig } from "./types.js";
 import { validateServerConfig } from "./utils.js";
 
-const NerdVersion = "b1.0.3";
+const NerdVersion = "b1.0.4";
 
 if (process.argv.length <= 2) {
     console.log("No arguments were supplied! Exiting...");

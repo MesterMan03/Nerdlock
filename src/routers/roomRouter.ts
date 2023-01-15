@@ -1,4 +1,5 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import { FilterQuery } from "mongoose";
 import * as yup from "yup";
 import Message, { INerdMessage } from "../database/Message.js";
@@ -8,7 +9,6 @@ import { nerdServer } from "../index.js";
 import { sseSessions } from "../sse.js";
 import { NerdMessage, NerdRoom, NerdRoomInvite, NerdRoomMember, NerdUserRoomData } from "../types.js";
 import { authRoom, authUser, verifyReq } from "../utils.js";
-import rateLimit from "express-rate-limit";
 
 const router = Router();
 
@@ -91,17 +91,37 @@ router.get("/sync", rateLimit({
     }
 
     res.json({ secrets, rooms });
+});
+
+const attachmentSchema = yup.object({
+    params: yup.object({
+        roomId: yup.string().matches(/^\d+$/).required(),
+        messageId: yup.string().matches(/^\d+$/).required(),
+        attachmentId: yup.string().matches(/^\d+$/).required()
+    })
+})
+router.get("/:roomId/attachments/:messageId/:attachmentId", verifyReq(attachmentSchema), async (req, res) => {
+    const message = await Message.findOne({ messageId: req.params.messageId, roomId: req.params.roomId });
+    if (!message)
+        return res.status(404).json({ error: "Message doesn't exist" });
+
+    const attachment = message.attachments.find((a) => a.attachmentId === req.params.attachmentId);
+    if (!attachment)
+        return res.status(404).json({ error: "Attachment doesn't exist" });
+
+    res.send(attachment.data);
 })
 
 const messagesSchema = yup.object({
     query: yup.object({
         before: yup.number().notRequired().integer(),
-        after: yup.number().notRequired().integer()
+        after: yup.number().notRequired().integer(),
+        limit: yup.number().notRequired().integer().min(1)
     })
 })
 router.get("/:roomId/messages", rateLimit({
-    windowMs: 60_000,
-    max: 20,
+    windowMs: 10_000,
+    max: 5,
     standardHeaders: true
 }), authUser, authRoom, verifyReq(messagesSchema), async (req, res) => {
     try {
@@ -109,6 +129,7 @@ router.get("/:roomId/messages", rateLimit({
 
         const before = req.query.before ? Number.parseInt(req.query.before.toString()) : null;
         const after = req.query.after ? Number.parseInt(req.query.after.toString()) : null;
+        const limit = req.query.limit ? Math.min(Number.parseInt(req.query.limit.toString()), 100) : 50;
 
         // this is extremely ugly and I'm sorry
         let filter: FilterQuery<INerdMessage>;
@@ -117,46 +138,67 @@ router.get("/:roomId/messages", rateLimit({
         if (!before && after) filter = { roomId, createdAt: { $gt: after } }
         if (!before && !after) filter = { roomId }
 
-        const messages = (await Message.find(filter, { _id: 0, __v: 0 }).sort({ date: 1 })).map(m => m.toObject<NerdMessage>());
+        let messages = (await Message.find(filter, { _id: 0, __v: 0 })
+            .sort({ date: 1, messageId: 1 })
+            .limit(limit))
+            .map(m => {
+                const final = m.toObject<NerdMessage>();
+                //@ts-ignore
+                final.attachments = final.attachments.map(a => a.attachmentId);
+                return final;
+            });
 
-        res.json({ messages: messages.slice(-50) });
+        res.json([...messages]);
     } catch (err) {
         console.error(err);
         res.sendStatus(500);
     }
 })
 
-const messageSchema = yup.object({
+const sendMessageSchema = yup.object({
     body: yup.object({
-        cipherText: yup.string().required(),
-        signature: yup.string().required()
-    })
+        content: yup.string().required(),
+        signature: yup.string().required(),
+        attachments: yup.array().of(yup.string()).required()
+    }),
 })
 router.post("/:roomId/message", rateLimit({
     windowMs: 60_000,
     max: 30,
     standardHeaders: true
-}), authUser, authRoom, verifyReq(messageSchema), async (req, res) => {
+}), authUser, authRoom, verifyReq(sendMessageSchema), async (req, res) => {
     try {
-        const roomId = String(req.params.roomId);
-        const cipherText = String(req.body.cipherText);
-        const signature = String(req.body.signature);
+        const roomId = req.params.roomId;
+        const content = req.body.content;
+        const signature = req.body.signature;
+        const attachments = req.body.attachments as string[];
 
         const room = await Room.findOne({ roomId });
+
+        const finalAttachments: { attachmentId: string; data: string; }[] = [];
+        for (const a of attachments) {
+            const attachmentId = nerdServer.snowflake.getUniqueID().toString();
+            finalAttachments.push({ attachmentId, data: a });
+        }
 
         const messageId = nerdServer.snowflake.getUniqueID().toString();
         const date = Date.now();
 
-        const messageObj: NerdMessage = {
+        const messageObj = {
             messageId,
             roomId,
             authorId: req.lockUser.userId,
-            cipherText,
+            content,
+            attachments: finalAttachments,
             signature,
             createdAt: date,
             lastModifiedAt: date
-        }
+        } satisfies NerdMessage;
         await Message.create(messageObj);
+
+        delete messageObj.attachments;
+
+        const finalMessage = Object.assign({}, messageObj, { attachments: finalAttachments.map(a => a.attachmentId) });
 
         // send out the message to all currently listening clients
         for (const member of room.members) {
@@ -165,11 +207,11 @@ router.post("/:roomId/message", rateLimit({
 
             for (const m of sseMembers) {
                 m.res.write("event: newMessage\n");
-                m.res.write(`data: ${JSON.stringify(messageObj)}\n\n`);
+                m.res.write(`data: ${JSON.stringify(finalMessage)}\n\n`);
             }
         }
 
-        res.json({ status: "ok", message: messageObj });
+        res.json({ status: "ok" });
     } catch (err) {
         console.error(err);
         res.sendStatus(500);

@@ -16,9 +16,22 @@ export default mongoose.model("Message", new Schema<INerdMessage>({
         type: SchemaTypes.String,
         required: true
     },
-    cipherText: {
+    content: {
         type: SchemaTypes.String,
         required: true
+    },
+    attachments: {
+        type: [{
+            attachmentId: {
+                type: SchemaTypes.String,
+                required: true
+            },
+            data: {
+                type: SchemaTypes.String,
+                required: true
+            }
+        }],
+        default: []
     },
     signature: {
         type: SchemaTypes.String,
@@ -30,6 +43,6 @@ export default mongoose.model("Message", new Schema<INerdMessage>({
     },
     lastModifiedAt: {
         type: SchemaTypes.Number,
-        required: true  
+        required: true
     }
 }))

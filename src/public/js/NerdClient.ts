@@ -12,7 +12,7 @@ import NerdUtils from "./NerdUtils.js";
 /**
  * Nerdlock server versions the client should accept
  */
-const acceptVersions = ["b1.0.3"];
+const acceptVersions = ["b1.0.4"];
 
 /**
  * The main entry point of the Nerdlock API
@@ -44,24 +44,27 @@ const APIEndpoints = {
     rooms: {
         sync: APIBase + "/rooms/sync",
         create: APIBase + "/rooms/create",
-        message: APIBase + "/rooms/:roomId/message",
+        attachment: APIBase + "/rooms/:roomId/attachments/:messageId/:attachmentId",
+        sendMessage: APIBase + "/rooms/:roomId/message",
         messages: APIBase + "/rooms/:roomId/messages",
         invite: APIBase + "/rooms/:roomId/invite/:userId",
         join: APIBase + "/rooms/join/:roomId",
     }
 }
 
-export interface NerdMessageFile {
+export interface NerdMessageAttachment {
     name: string;
     type: string;
     data: string;
     size: number;
+    signature?: string;
 }
 
 export interface NerdMessageContent {
     text?: string;
-    files?: NerdMessageFile[];
     replyingTo?: string;
+    attachments?: NerdMessageAttachment[];
+    loadAttachments?: () => Promise<NerdMessageAttachment[]>;
 }
 
 export interface NerdMessage {
@@ -80,8 +83,9 @@ export interface NerdRawMessage {
     authorId: string;
     createdAt: number;
     lastModifiedAt: number;
-    cipherText: string;
+    content: string;
     signature: string;
+    attachments: string[];
 }
 
 export interface NerdRoom {
@@ -101,7 +105,7 @@ export interface NerdUser {
     username: string;
     accessToken: string;
     userId: string;
-    public: NerdUserPublicData;
+    public: NerdUserX3DHData;
     rooms: Map<string, NerdRoom>;
     mfa: {
         totp: boolean;
@@ -123,20 +127,20 @@ interface NerdUserLoginOpt {
     totp?: string;
 }
 
-interface NerdUserRegOpt extends NerdUserPublicData {
+interface NerdUserRegOpt extends NerdUserX3DHData {
     mastKey: string;
 }
 
-interface NerdUserPublicData {
+interface NerdUserX3DHData {
     idenKey: { private: string; public: string; };
-    preKey: { private: string; public: string; sign: string; }
+    preKey: { private: string; public: string; sign: string; expiration: number; }
     oneTimeKeys: { id: number; private: string; public: string; }[];
 }
 
-interface NerdUserX3DHData {
+interface NerdUserX3DHResponse {
     idenKey: { public: string; };
     otKey: { id: number; public: string; };
-    preKey: { public: string; sign: string; };
+    preKey: { public: string; sign: string; expiration: number; };
     userId: string;
     username: string;
 }
@@ -271,6 +275,33 @@ class NerdClient {
                     console.error("Failed to update one time keys");
             }
 
+            // regenerate pre key
+            if ((this.user.public.preKey.expiration ?? 0) < Date.now()) {
+                console.log("[Nerdlock] Regenerating prekey");
+                const { privateKey, publicKey } = await crypto.subtle.generateKey({ name: "ECDH", namedCurve: "P-521" }, true, ["deriveKey"]);
+
+                const iv = crypto.getRandomValues(new Uint8Array(32));
+                const privateKeyEnc = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, masterKey, await crypto.subtle.exportKey("pkcs8", privateKey))
+                    .then((data) => { return `${CryptoHelper.enc.UintToString(iv, "base64")}.${CryptoHelper.enc.UintToString(data, "base64")}` });
+
+                const publicKeyUint = await crypto.subtle.exportKey("raw", publicKey);
+
+                const idenKeyPriv = await crypto.subtle.importKey("pkcs8", CryptoHelper.enc.StringToUint(this.user.public.idenKey.private, "base64"), { name: "ECDSA", namedCurve: "P-521" }, false, ["sign"]);
+
+                const publicKeySign = CryptoHelper.enc.UintToString(await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-512" }, idenKeyPriv, publicKeyUint), "base64");
+
+                const expiration = Date.now() + 1000 * 60 * 60 * 24;
+
+                const r = await fetch(this.domain + APIEndpoints.users.root, {
+                    method: "PATCH",
+                    body: JSON.stringify({ preKey: { private: privateKeyEnc, public: CryptoHelper.enc.UintToString(publicKeyUint, "base64"), sign: publicKeySign, expiration } }),
+                    headers: { "Authorization": this.user.accessToken, "Content-Type": "application/json" }
+                });
+
+                if (!r.ok)
+                    console.error("Failed to update pre key");
+            }
+
             this.rooms = new RoomManager(this, NerdCache.messages);
             this.userSecrets = new UserSecretManager(this, secretRequests, secretMessages);
             this.userStore = new UserStore(this);
@@ -340,10 +371,12 @@ class NerdClient {
                 oneTimeKeys.push({ id: i, private: privateKeyEnc, public: publicKeyString });
             }
 
+            const expiration = Date.now() + 1000 * 60 * 60 * 24 // one day
+
             const opt: NerdUserRegOpt = {
                 mastKey: masterKeyEnc,
                 idenKey: { private: privIdenKeyEnc, public: publicIdenKeyString },
-                preKey: { private: privPreKeyEnc, public: CryptoHelper.enc.UintToString(publicPreKey, "base64"), sign: publicPreKeySignString },
+                preKey: { private: privPreKeyEnc, public: CryptoHelper.enc.UintToString(publicPreKey, "base64"), sign: publicPreKeySignString, expiration },
                 oneTimeKeys
             }
 
@@ -362,9 +395,7 @@ class NerdClient {
             const room = this.rooms.get(message.roomId);
             if (!room) return;
 
-            this.userStore.fetchUser(message.authorId).then((author) => {
-                NerdUtils.decodeRawMessage(room, message, author);
-            });
+            this.rooms.decodeRawMessage(room, message);
         });
 
         this.sse.addEventListener("secretRequest", (event) => {
@@ -490,8 +521,7 @@ class RoomManager {
         this.sync().then(async () => {
             for (const [_, room] of this.#rooms) {
                 for (const m of messages.filter(x => x.roomId === room.roomId)) {
-                    const author = await this.#client.userStore.fetchUser(m.authorId);
-                    await NerdUtils.decodeRawMessage(room, m, author);
+                    this.decodeRawMessage(room, m);
                 }
             }
         })
@@ -550,40 +580,60 @@ class RoomManager {
             if (!room) return null;
 
             // verify message
-            const keys = Object.keys(message)
-            if (keys.length === 0 || keys.find(k => !["text", "files", "replyingTo"].includes(k)))
+            const keys = Object.keys(message);
+            if (keys.length === 0 || keys.find(k => !["text", "attachments", "replyingTo"].includes(k)))
                 throw new Error("Invalid message structure");
 
+            const attachments = message.attachments;
+            delete message.attachments;
+
             const key = await CryptoHelper.keyFromUint(CryptoHelper.enc.StringToUint(room.secret, "base64"));
+            const idenKeyPriv = await crypto.subtle.importKey("pkcs8", CryptoHelper.enc.StringToUint(this.#client.user.public.idenKey.private, "base64"), { name: "ECDSA", namedCurve: "P-521" }, false, ["sign"]);
+
             const iv = crypto.getRandomValues(new Uint8Array(32));
-            const cipherText = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, CryptoHelper.enc.StringToUint(JSON.stringify(message)))
-                .then(data => { return `${CryptoHelper.enc.UintToString(iv, "base64")}.${CryptoHelper.enc.UintToString(data, "base64")}`; })
-                .catch(err => { throw err; });
+            const content = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, CryptoHelper.enc.StringToUint(JSON.stringify(message)))
+                .then(data => { return `${CryptoHelper.enc.UintToString(iv, "base64")}.${CryptoHelper.enc.UintToString(data, "base64")}`; });
+
+            const attachmentsEnc = [];
+            for (const a of attachments) {
+                const iv = crypto.getRandomValues(new Uint8Array(32));
+
+                const checksum = await crypto.subtle.digest("SHA-512", CryptoHelper.enc.StringToUint(a.data));
+                const signature = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-512" }, idenKeyPriv, checksum)
+                    .then(data => { return CryptoHelper.enc.UintToString(data, "base64") });
+
+                a.signature = signature;
+
+                const data = await crypto.subtle.encrypt({ name: "AES-GCM", iv }, key, CryptoHelper.enc.StringToUint(JSON.stringify(a)))
+                    .then(data => { return `${CryptoHelper.enc.UintToString(iv, "base64")}.${CryptoHelper.enc.UintToString(data, "base64")}`; });
+
+                attachmentsEnc.push(data);
+            }
 
             // create signature
-            const idenKeyPriv = await crypto.subtle.importKey("pkcs8", CryptoHelper.enc.StringToUint(this.#client.user.public.idenKey.private, "base64"), { name: "ECDSA", namedCurve: "P-521" }, false, ["sign"]);
-            const signature = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-512" }, idenKeyPriv, CryptoHelper.enc.StringToUint(cipherText))
+            const checksum = await crypto.subtle.digest("SHA-512", CryptoHelper.enc.StringToUint(content));
+            const signature = await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-512" }, idenKeyPriv, checksum)
                 .then(data => { return CryptoHelper.enc.UintToString(data, "base64") });
 
-            const r = await fetch(this.#client.domain + APIEndpoints.rooms.message.replace(":roomId", room.roomId), {
+            const r = await fetch(this.#client.domain + APIEndpoints.rooms.sendMessage.replace(":roomId", room.roomId), {
                 method: "POST",
                 headers: { "Authorization": this.#client.user.accessToken, "Content-Type": "application/json" },
-                body: JSON.stringify({ cipherText, signature })
+                body: JSON.stringify({ content, signature, attachments: attachmentsEnc })
             });
 
             if (!r.ok)
                 throw new Error("Non-ok response from server");
 
-            return r.json() as Promise<{ status: string; message: NerdRawMessage }>;
+            return true;
         }
         catch (err) {
             console.error(err);
             console.log(`Failed to send message to room ${roomId}`);
-            return null;
+            return false;
         }
     }
 
-    async loadMessages(roomId: string, options?: { before?: number, after?: number }) {
+    async loadMessages(roomId: string, options?: { before?: number, after?: number, limit?: number }) {
         try {
             const room = this.get(roomId);
             if (!room) return;
@@ -591,12 +641,12 @@ class RoomManager {
             const destination = new URL(this.#client.domain + APIEndpoints.rooms.messages.replace(":roomId", room.roomId));
             if (options?.before) destination.searchParams.append("before", options.before.toString());
             if (options?.after) destination.searchParams.append("after", options.after.toString());
+            if (options?.limit) destination.searchParams.append("limit", options.limit.toString());
 
             // load messages
             const r = await fetch(destination.toString(), {
                 headers: { Authorization: this.#client.user.accessToken },
             })
-                .then(r => { return r; })
                 .catch(err => {
                     console.error(err);
                     console.log(`Couldn't load messages for room ${roomId}`);
@@ -604,20 +654,19 @@ class RoomManager {
 
             if (!r) return;
 
-            const data: { messages: NerdRawMessage[] } = await r.json();
+            const messages = await r.json() as NerdRawMessage[];
 
             // decrypt messages
             const key = await CryptoHelper.keyFromUint(CryptoHelper.enc.StringToUint(room.secret, "base64"));
 
-            for (const message of data.messages) {
+            for (const message of messages) {
                 if (room.messages.find(m => m.messageId === message.messageId)) continue;
-                const author = await this.#client.userStore.fetchUser(message.authorId);
-                await NerdUtils.decodeRawMessage(room, message, author, key, true);
+                await this.decodeRawMessage(room, message, key, true);
             }
 
             room.messages = room.messages.sort((a, b) => a.createdAt - b.createdAt);
             room.messages = room.messages.filter((value, index, self) => self.findIndex(m => m.messageId === value.messageId) === index);
-            return data.messages.length;
+            return messages.length;
         } catch (err) {
             console.error(err);
             console.log(`Failed to load messages for ${roomId}`);
@@ -709,6 +758,125 @@ class RoomManager {
             return false;
         }
     }
+
+    /**
+     * Function for decoding an incoming message from the server and adding it to the room
+     * @param room The room the message belongs to
+     * @param message The incoming message object
+     * @param key The key for decrypting messages (optional)
+     * @param noEvent If true, the function won't dispatch a nerdlock.newMessage event to window
+     */
+    async decodeRawMessage(room: NerdRoom, message: NerdRawMessage, key?: CryptoKey, noEvent: boolean = false) {
+        try {
+            let found: NerdMessage;
+            if (found = room.messages.find(m => m.messageId === message.messageId))
+                return found;
+
+            const author = await this.#client.userStore.fetchUser(message.authorId);
+
+            key = key || await CryptoHelper.keyFromUint(CryptoHelper.enc.StringToUint(room.secret, "base64"));
+
+            // verify ciphertext
+            let verified: boolean;
+            const checksum = await crypto.subtle.digest("SHA-512", CryptoHelper.enc.StringToUint(message.content));
+            if (!(verified = await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-512" }, author.identityKey, CryptoHelper.enc.StringToUint(message.signature, "base64"), checksum)))
+                console.warn(`Message ${message.messageId} from ${message.authorId} (${author.username}) could not be verified with the signature. Proceed with caution!`);
+
+            const [iv, cipherText] = message.content.split(".");
+            const content = await crypto.subtle.decrypt({ name: "AES-GCM", iv: CryptoHelper.enc.StringToUint(iv, "base64") },
+                key, CryptoHelper.enc.StringToUint(cipherText, "base64"))
+                .then(data => {
+                    try {
+                        let messageContent = JSON.parse(CryptoHelper.enc.UintToString(data)) as NerdMessageContent;
+                        messageContent.loadAttachments = async () => {
+                            messageContent.attachments = messageContent.attachments || [];
+                            delete messageContent.loadAttachments;
+
+                            if (message.attachments.length === 0)
+                                return [];
+
+                            for (const attachmentId of message.attachments) {
+                                let data: string;
+
+                                const cached = NerdCache.attachments.find((a) => a.attachmentId === attachmentId);
+                                if (!cached) {
+                                    const r = await fetch(this.#client.domain + APIEndpoints.rooms.attachment
+                                        .replace(":roomId", room.roomId)
+                                        .replace(":messageId", message.messageId)
+                                        .replace(":attachmentId", attachmentId));
+
+                                    if (!r.ok) {
+                                        console.warn(`Failed to load attachment ${attachmentId} of message ${message.messageId}`);
+                                        continue;
+                                    }
+
+                                    data = await r.text();
+                                }
+                                else data = cached.attachment;
+
+                                const [iv, cipherText] = data.split(".");
+                                const file = await crypto.subtle.decrypt({ name: "AES-GCM", iv: CryptoHelper.enc.StringToUint(iv, "base64") },
+                                    key, CryptoHelper.enc.StringToUint(cipherText, "base64"))
+                                    .then(async (data) => {
+                                        try {
+                                            const fileData = JSON.parse(CryptoHelper.enc.UintToString(data)) as NerdMessageAttachment;
+
+                                            const checksum = await crypto.subtle.digest("SHA-512", CryptoHelper.enc.StringToUint(fileData.data));
+                                            if (!await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-512" }, author.identityKey, CryptoHelper.enc.StringToUint(fileData.signature, "base64"), checksum)) {
+                                                verified = false;
+                                                console.warn(`A file from message ${message.messageId} of ${message.authorId} (${author.username}) could not be verified with the signature. Proceed with caution!`);
+                                            }
+
+                                            return fileData;
+                                        } catch {
+                                            return null;
+                                        }
+                                    })
+
+                                if (!file) continue;
+                                messageContent.attachments.push(file);
+                                if (!cached) NerdCache.attachments.push({ attachmentId, attachment: data });
+                            }
+
+                            return messageContent.attachments;
+                        }
+
+                        return messageContent;
+                    } catch (err) {
+                        throw new Error("Couldn't read message structure (possibly came from an old client)")
+                    }
+                })
+                .catch(err => { throw err; });
+
+            // verify message
+            const keys = Object.keys(content);
+            if (keys.length === 0 || keys.find(k => !["text", "replyingTo", "attachments", "loadAttachments"].includes(k)))
+                throw new Error("Invalid message structure");
+
+            const finalMessage = {
+                messageId: message.messageId,
+                authorId: message.authorId,
+                roomId: room.roomId,
+                createdAt: message.createdAt,
+                lastModifiedAt: message.lastModifiedAt,
+                content,
+                verified
+            } satisfies NerdMessage;
+
+            room.messages.push(finalMessage);
+            if (!NerdCache.messages.find(m => m.messageId === message.messageId))
+                NerdCache.messages.push(message);
+
+            if (!noEvent) window.dispatchEvent(new CustomEvent("nerdlock.newMessage", { detail: finalMessage }));
+
+            return finalMessage;
+        }
+        catch (err) {
+            console.error(err);
+            console.log(`Failed to decode message ${message.messageId}`);
+            return null;
+        }
+    }
 }
 
 /**
@@ -744,7 +912,7 @@ class UserSecretManager {
             if (!r.ok)
                 throw new Error("Server didn't respond with an ok status while requesting public keys");
 
-            const publicInfo = await r.json() as NerdUserX3DHData;
+            const publicInfo = await r.json() as NerdUserX3DHResponse;
 
             // step 1: verify prekey
             const signIdenKey = await crypto.subtle.importKey("raw", CryptoHelper.enc.StringToUint(publicInfo.idenKey.public, "base64"), { name: "ECDSA", namedCurve: "P-521" }, false, ["verify"]);

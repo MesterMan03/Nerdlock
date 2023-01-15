@@ -28,7 +28,7 @@ export interface NerdUser {
     masterKey: string,
     public: {
         idenKey: { public: string; private: string; }
-        preKey: { public: string; private: string; sign: string; }
+        preKey: { public: string; private: string; sign: string; expiration: number; }
         oneTimeKeys: { id: number; private: string; public: string; }[]
     };
     usedOneTimeKeys: { id: number; private: string; }[];
@@ -77,7 +77,11 @@ export interface NerdMessage {
     roomId: string;
     messageId: string;
     authorId: string;
-    cipherText: string;
+    content: string;
+    attachments: {
+        data: string;
+        attachmentId: string;
+    }[];
     signature: string;
     createdAt: number;
     lastModifiedAt: number;

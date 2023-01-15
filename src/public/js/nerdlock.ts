@@ -1,5 +1,5 @@
 import CryptoHelper from "./CryptoHelper.js";
-import NerdClient, { NerdMessage, NerdMessageFile } from "./NerdClient.js";
+import NerdClient, { NerdMessage, NerdMessageAttachment } from "./NerdClient.js";
 globalThis.NerdClient = NerdClient;
 globalThis.CryptoHelper = CryptoHelper;
 
@@ -16,7 +16,7 @@ const filesDiv = document.getElementById("files") as HTMLDivElement;
 const contextMenu = document.getElementById("contextmenu") as HTMLDivElement;
 const messageInfo = document.getElementById("messageinfo") as HTMLTextAreaElement;
 
-let filesToUpload: NerdMessageFile[] = [];
+let filesToUpload: NerdMessageAttachment[] = [];
 let replyingTo: string;
 let loadingRoom: boolean = false;
 
@@ -135,7 +135,7 @@ async function sendMessage() {
     const content = messageInput.innerText.trim();
     if (content === "" && filesToUpload.length === 0) return;
 
-    const files: NerdMessageFile[] = [];
+    const files: NerdMessageAttachment[] = [];
     loadfiles: for (const f of filesToUpload) {
         if (f.size > 10_000_000) // skip file if it's over 10 mb
             continue;
@@ -154,7 +154,7 @@ async function sendMessage() {
     messageInput.innerText = "";
     document.getElementById("replyingto").innerText = "";
 
-    client.rooms.sendMessage(room.roomId, { text: content, files, replyingTo });
+    client.rooms.sendMessage(room.roomId, { text: content, attachments: files, replyingTo });
     replyingTo = null;
 }
 
@@ -170,7 +170,7 @@ document.getElementById("messageinput").addEventListener("paste", async (event: 
         event.preventDefault();
 
     for (const f of event.clipboardData.files) {
-        const file: NerdMessageFile = {
+        const file: NerdMessageAttachment = {
             data: CryptoHelper.enc.UintToString(await f.arrayBuffer(), "base64"),
             type: f.type,
             name: f.name,
@@ -185,7 +185,7 @@ document.getElementById("room").ondrop = async function (event: DragEvent) {
     event.preventDefault();
 
     for (const f of [...event.dataTransfer.files]) {
-        const file: NerdMessageFile = {
+        const file: NerdMessageAttachment = {
             data: CryptoHelper.enc.UintToString(await f.arrayBuffer(), "base64"),
             type: f.type,
             name: f.name,
@@ -223,9 +223,8 @@ document.getElementById("invitemember").addEventListener("click", async () => {
     client.rooms.inviteUser(room.roomId, userId);
 });
 
-document.getElementById("togglemembers").addEventListener("click", () => {
-    if (membersDiv.style.display == "none") membersDiv.style.display = "block";
-    else membersDiv.style.display = "none";
+document.getElementById("showmembers").addEventListener("click", () => {
+    membersDiv.style.display = "block";
 });
 
 document.getElementById("uploadfile").addEventListener("click", () => {
@@ -238,7 +237,7 @@ document.getElementById("uploadfile").addEventListener("click", () => {
     input.onchange = async () => {
         for (let i = 0; i < input.files.length; i++) {
             const rawFile = input.files.item(i);
-            const file: NerdMessageFile = {
+            const file: NerdMessageAttachment = {
                 name: rawFile.name,
                 size: rawFile.size,
                 type: rawFile.type,
@@ -358,7 +357,7 @@ async function addMessage(message: NerdMessage, needInfo: boolean) {
 
     if (!message.verified) messageDiv.classList.add("unverified");
 
-    if ((message.content.files ?? []).length !== 0) needInfo = true;
+    if ((message.content.attachments ?? []).length !== 0) needInfo = true;
     if (message.content.replyingTo) needInfo = true;
 
     addReply: if (message.content.replyingTo) {
@@ -386,8 +385,8 @@ async function addMessage(message: NerdMessage, needInfo: boolean) {
 
         if (repliedMessage.content.text)
             reply.innerText += `${repliedMessage.content.text}`;
-        else if (repliedMessage.content.files?.length !== 0)
-            reply.innerText += `${repliedMessage.content.files.length} files uploaded`;
+        else if (repliedMessage.content.attachments?.length !== 0)
+            reply.innerText += `${repliedMessage.content.attachments.length} files uploaded`;
 
         messageDiv.appendChild(reply);
     }
@@ -405,29 +404,33 @@ async function addMessage(message: NerdMessage, needInfo: boolean) {
     content.innerText = `${message.content?.text ?? message.content}`;
     messageDiv.appendChild(content);
 
-    for (const f of message.content?.files ?? []) {
-        if (f.type.indexOf("image") !== -1 || f.type.indexOf("video") !== -1) {
-            const element = f.type.indexOf("image") !== -1 ? document.createElement("img") : document.createElement("video");
+    (async () => {
+        const attachments = message.content.loadAttachments ? await message.content.loadAttachments() : message.content.attachments;
+        for (const a of attachments) {
+            if (a.type.indexOf("image") !== -1 || a.type.indexOf("video") !== -1) {
+                const element = a.type.indexOf("image") !== -1 ? document.createElement("img") : document.createElement("video");
+                element.classList.add("file");
 
-            element.src = `data:${f.type};base64,${f.data}`;
-            if (element instanceof HTMLVideoElement) element.setAttribute("controls", "controls");
+                element.src = `data:${a.type};base64,${a.data}`;
+                if (element instanceof HTMLVideoElement) element.setAttribute("controls", "controls");
 
-            messageDiv.appendChild(element);
-        } else {
-            const element = document.createElement("a");
-            element.classList.add("file");
+                messageDiv.appendChild(element);
+            } else {
+                const element = document.createElement("a");
+                element.classList.add("file");
 
-            // create file
-            const blob = new Blob([CryptoHelper.enc.StringToUint(f.data, "base64")], { type: f.type });
-            const objectURL = URL.createObjectURL(blob);
+                // create file
+                const blob = new Blob([CryptoHelper.enc.StringToUint(a.data, "base64")], { type: a.type });
+                const objectURL = URL.createObjectURL(blob);
 
-            element.innerText = f.name;
-            element.download = f.name;
-            element.href = objectURL;
+                element.innerText = a.name;
+                element.download = a.name;
+                element.href = objectURL;
 
-            messageDiv.appendChild(element);
+                messageDiv.appendChild(element);
+            }
         }
-    }
+    })();
 
     // create context menu
     messageDiv.addEventListener("contextmenu", (event) => {
@@ -473,7 +476,7 @@ function scrollToBottom() {
     messagesDiv.scroll({ behavior: "smooth", top: messagesDiv.scrollHeight });
 }
 
-function addFile(file: NerdMessageFile) {
+function addFile(file: NerdMessageAttachment) {
     filesToUpload.push(file);
 
     if (filesToUpload.length === 1) filesDiv.innerText = "Uploading files: ";

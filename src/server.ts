@@ -75,6 +75,7 @@ export class NerdServer {
                 "script-src": [expressCSP.SELF],
                 "style-src": [expressCSP.SELF, expressCSP.INLINE],
                 "img-src": [expressCSP.SELF, expressCSP.DATA],
+                "media-src": [expressCSP.SELF, expressCSP.DATA],
                 "connect-src": ["*"]
             }
         }))

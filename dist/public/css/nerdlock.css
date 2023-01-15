@@ -100,7 +100,6 @@ body {
     color: var(--white);
 }
 
-
 #createroom {
     margin-top: auto;
 }
@@ -166,9 +165,6 @@ body {
 
 #authform>input[type="radio"] {
     display: none;
-    appearance: none;
-    margin: 0;
-    user-select: none;
 }
 
 #authform>label {
@@ -402,11 +398,15 @@ body {
     color: var(--light-brand-colour);
 }
 
-#base {
-    flex: 1;
+#roomwrapper {
+    flex: 1 1 0%;
 
+    min-height: 0px;
+    min-width: 0px;
+}
+
+#roomcontent {
     height: 100%;
-
     display: flex;
     flex-direction: column;
 }
@@ -416,6 +416,7 @@ body {
 
     display: flex;
     justify-content: flex-end;
+    gap: 2px;
 
     align-items: center;
 
@@ -426,6 +427,14 @@ body {
     box-shadow: 0px 1px 2px 0px rgba(0, 0, 0, 0.8);
 }
 
+#toolbar>svg {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+#closeroom {
+    display: none;
+}
 
 #roomname {
     margin-right: auto;
@@ -445,7 +454,8 @@ body {
 }
 
 
-#togglemembers {
+#showmembers {
+    display: none;
     cursor: pointer;
 }
 
@@ -475,6 +485,7 @@ body {
 
 .message {
     width: 100%;
+
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -488,11 +499,6 @@ body {
 .message:hover *,
 .message:hover {
     background-color: var(--column-colour);
-}
-
-.message * {
-    word-break: break-word;
-    white-space: break-spaces;
 }
 
 .message.highlight {
@@ -522,6 +528,9 @@ body {
     transition: color 0.2s ease;
 
     font-size: 0.8rem;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .reply:hover {
@@ -534,7 +543,7 @@ body {
 }
 
 .message .file {
-    width: max-content;
+    max-width: 100%;
 
     padding: 5px;
 
@@ -556,9 +565,9 @@ body {
     color: var(--warning-colour);
 }
 
-.message img,
-.message video {
-    max-width: max(30%, 250px);
+.message img.file,
+.message video.file {
+    max-width: 20rem !important;
 
     object-fit: contain;
 
@@ -566,7 +575,9 @@ body {
     border-radius: 5px;
 }
 
-.message>.content {
+.message .content {
+    word-break: break-word;
+    white-space: break-spaces;
     color: var(--white);
 }
 
@@ -829,12 +840,18 @@ body {
 }
 
 @media only screen and (hover: none) and (pointer: coarse) {
-    #navigator {
-        width: 13%;
+    /*
+    #closeroom {
+        display: block;
+    }*/
+}
+
+@media only screen and (max-width: 700px) {
+    #members {
+        display: none;
     }
 
-    #rooms,
-    #createroom {
-        width: 100%;
+    #showmembers {
+        display: block;
     }
 }

@@ -54,7 +54,8 @@ const userPatchSchema = yup.object({
         preKey: yup.object({
             private: yup.string(),
             public: yup.string(),
-            id: yup.number().integer().min(0).max(50)
+            id: yup.number().integer().min(0).max(50),
+            expiration: yup.number().integer()
         }).notRequired(),
         rooms: yup.array().of(yup.object({
             roomId: yup.string().required(),
@@ -246,7 +247,8 @@ const registerSchema = yup.object({
             preKey: yup.object({
                 private: yup.string().required(),
                 public: yup.string().required(),
-                sign: yup.string().required()
+                sign: yup.string().required(),
+                expiration: yup.number().integer().required()
             }),
             oneTimeKeys: yup.array().of(yup.object({
                 id: yup.number().required().integer().min(0).max(50),

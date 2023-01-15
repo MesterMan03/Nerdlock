@@ -52,6 +52,10 @@ export default mongoose.model("User", new mongoose.Schema<INerdUser>({
             sign: {
                 type: SchemaTypes.String,
                 required: true
+            },
+            expiration: {
+                type: SchemaTypes.Number,
+                required: true
             }
         },
         oneTimeKeys: {

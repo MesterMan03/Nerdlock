@@ -86,11 +86,17 @@ self.addEventListener("message", async function (event) {
                     const db = r.result;
 
                     console.log(`[Nerdlock] Writing cache...`);
-                    const transaction = db.transaction(["messages"], "readwrite");
+                    const transaction = db.transaction(["messages", "attachments"], "readwrite");
 
                     const messages = transaction.objectStore("messages");
                     for (const m of data.messages) {
                         const request = messages.put(m);
+                        request.onsuccess = () => { ; }
+                    }
+
+                    const attachments = transaction.objectStore("attachments");
+                    for (const a of data.attachments) {
+                        const request = attachments.put(a);
                         request.onsuccess = () => { ; }
                     }
                 } catch { ; }

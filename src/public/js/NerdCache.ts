@@ -3,10 +3,11 @@ import { NerdPublicUser, NerdRawMessage } from "./NerdClient.js"
 export interface NerdCache {
     messages: NerdRawMessage[];
     users: NerdPublicUser[];
+    attachments: { attachmentId: string; attachment: string }[];
 }
 
 let db: IDBDatabase;
-export const cache: NerdCache = { messages: [], users: [] };
+export const cache: NerdCache = { messages: [], users: [], attachments: [] };
 
 const r = window.indexedDB.open("NerdCache", 1);
 
@@ -22,6 +23,7 @@ r.onupgradeneeded = async (ev) => {
 
     db.createObjectStore("messages", { keyPath: "messageId" });
     db.createObjectStore("users", { keyPath: "userId" });
+    db.createObjectStore("attachments", { keyPath: "attachmentId" });
 }
 
 window.addEventListener("beforeunload", async () => {
@@ -31,7 +33,7 @@ window.addEventListener("beforeunload", async () => {
 async function loadCache() {
     try {
         console.log(`[Nerdlock] Loading cache...`);
-        const transaction = db.transaction(["messages"], "readonly");
+        const transaction = db.transaction(["messages", "attachments"], "readonly");
 
         const messages = transaction.objectStore("messages");
         messages.openCursor().onsuccess = (ev) => {
@@ -40,6 +42,17 @@ async function loadCache() {
             if (!cursor) return;
 
             cache.messages.push(cursor.value);
+
+            cursor.continue();
+        }
+
+        const attachments = transaction.objectStore("attachments");
+        attachments.openCursor().onsuccess = (ev) => {
+            //@ts-expect-error
+            const cursor = ev.target.result as IDBCursorWithValue;
+            if (!cursor) return;
+
+            cache.attachments.push(cursor.value);
 
             cursor.continue();
         }

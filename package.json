@@ -1,6 +1,6 @@
 {
     "name": "nerdlock",
-    "version": "b1.0.3",
+    "version": "b1.0.4",
     "description": "A simple E2EE messaging app.",
     "main": "dist/index.js",
     "scripts": {
@@ -21,7 +21,7 @@
         "@types/otplib": "^10.0.0",
         "@types/qrcode": "^1.5.0",
         "@types/uuid": "^8.3.4",
-        "typescript": "^4.8.4"
+        "typescript": "^4.9.4"
     },
     "dependencies": {
         "@ltd/j-toml": "^1.35.2",
