@@ -850,7 +850,7 @@ class RoomManager {
 
             // verify message
             const keys = Object.keys(content);
-            if (keys.length === 0 || keys.find(k => !["text", "replyingTo", "attachments", "loadAttachments"].includes(k)))
+            if (keys.length === 0 || keys.find(k => !["text", "replyingTo", "attachments", "loadAttachments", "files"].includes(k)))
                 throw new Error("Invalid message structure");
 
             const finalMessage = {
