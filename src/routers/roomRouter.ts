@@ -138,9 +138,7 @@ router.get("/:roomId/messages", rateLimit({
         if (!before && after) filter = { roomId, createdAt: { $gt: after } }
         if (!before && !after) filter = { roomId }
 
-        let messages = (await Message.find(filter, { _id: 0, __v: 0 })
-            .sort({ date: 1, messageId: 1 })
-            .limit(limit))
+        const messages = (await Message.find(filter, { _id: 0, __v: 0 }, { limit, sort: { date: -1, messageId: -1 } }))
             .map(m => {
                 const final = m.toObject<NerdMessage>();
                 //@ts-ignore
