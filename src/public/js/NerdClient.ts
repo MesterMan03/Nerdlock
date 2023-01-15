@@ -788,58 +788,64 @@ class RoomManager {
                 .then(data => {
                     try {
                         let messageContent = JSON.parse(CryptoHelper.enc.UintToString(data)) as NerdMessageContent;
-                        messageContent.loadAttachments = async () => {
-                            messageContent.attachments = messageContent.attachments || [];
-                            delete messageContent.loadAttachments;
+                        //@ts-ignore
+                        if (messageContent.files) messageContent.attachments = messageContent.files;
+                        else
+                            messageContent.loadAttachments = async () => {
+                                messageContent.attachments = messageContent.attachments || [];
+                                delete messageContent.loadAttachments;
 
-                            if (message.attachments.length === 0)
-                                return [];
+                                if (message.attachments.length === 0)
+                                    return [];
 
-                            for (const attachmentId of message.attachments) {
-                                let data: string;
+                                for (const attachmentId of message.attachments) {
+                                    let data: string;
 
-                                const cached = NerdCache.attachments.find((a) => a.attachmentId === attachmentId);
-                                if (!cached) {
-                                    const r = await fetch(this.#client.domain + APIEndpoints.rooms.attachment
-                                        .replace(":roomId", room.roomId)
-                                        .replace(":messageId", message.messageId)
-                                        .replace(":attachmentId", attachmentId));
+                                    const cached = NerdCache.attachments.find((a) => a.attachmentId === attachmentId);
+                                    if (!cached) {
+                                        const r = await fetch(this.#client.domain + APIEndpoints.rooms.attachment
+                                            .replace(":roomId", room.roomId)
+                                            .replace(":messageId", message.messageId)
+                                            .replace(":attachmentId", attachmentId));
 
-                                    if (!r.ok) {
-                                        console.warn(`Failed to load attachment ${attachmentId} of message ${message.messageId}`);
-                                        continue;
-                                    }
-
-                                    data = await r.text();
-                                }
-                                else data = cached.attachment;
-
-                                const [iv, cipherText] = data.split(".");
-                                const file = await crypto.subtle.decrypt({ name: "AES-GCM", iv: CryptoHelper.enc.StringToUint(iv, "base64") },
-                                    key, CryptoHelper.enc.StringToUint(cipherText, "base64"))
-                                    .then(async (data) => {
-                                        try {
-                                            const fileData = JSON.parse(CryptoHelper.enc.UintToString(data)) as NerdMessageAttachment;
-
-                                            const checksum = await crypto.subtle.digest("SHA-512", CryptoHelper.enc.StringToUint(fileData.data));
-                                            if (!await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-512" }, author.identityKey, CryptoHelper.enc.StringToUint(fileData.signature, "base64"), checksum)) {
-                                                verified = false;
-                                                console.warn(`A file from message ${message.messageId} of ${message.authorId} (${author.username}) could not be verified with the signature. Proceed with caution!`);
-                                            }
-
-                                            return fileData;
-                                        } catch {
-                                            return null;
+                                        if (!r.ok) {
+                                            console.warn(`Failed to load attachment ${attachmentId} of message ${message.messageId}`);
+                                            continue;
                                         }
-                                    })
 
-                                if (!file) continue;
-                                messageContent.attachments.push(file);
-                                if (!cached) NerdCache.attachments.push({ attachmentId, attachment: data });
+                                        data = await r.text();
+                                    }
+                                    else data = cached.attachment;
+
+                                    const [iv, cipherText] = data.split(".");
+                                    const file = await crypto.subtle.decrypt({ name: "AES-GCM", iv: CryptoHelper.enc.StringToUint(iv, "base64") },
+                                        key, CryptoHelper.enc.StringToUint(cipherText, "base64"))
+                                        .then(async (data) => {
+                                            try {
+                                                const fileData = JSON.parse(CryptoHelper.enc.UintToString(data)) as NerdMessageAttachment;
+
+                                                const checksum = await crypto.subtle.digest("SHA-512", CryptoHelper.enc.StringToUint(fileData.data));
+                                                if (!await crypto.subtle.verify({ name: "ECDSA", hash: "SHA-512" }, author.identityKey, CryptoHelper.enc.StringToUint(fileData.signature, "base64"), checksum)) {
+                                                    verified = false;
+                                                    console.warn(`A file from message ${message.messageId} of ${message.authorId} (${author.username}) could not be verified with the signature. Proceed with caution!`);
+                                                }
+
+                                                return fileData;
+                                            } catch {
+                                                return null;
+                                            }
+                                        })
+
+                                    if (!file) continue;
+                                    messageContent.attachments.push(file);
+                                    if (!cached) NerdCache.attachments.push({ attachmentId, attachment: data });
+                                }
+
+                                return messageContent.attachments;
                             }
 
-                            return messageContent.attachments;
-                        }
+                        //@ts-ignore
+                        delete messageContent.files;
 
                         return messageContent;
                     } catch (err) {
@@ -850,7 +856,7 @@ class RoomManager {
 
             // verify message
             const keys = Object.keys(content);
-            if (keys.length === 0 || keys.find(k => !["text", "replyingTo", "attachments", "loadAttachments", "files"].includes(k)))
+            if (keys.length === 0 || keys.find(k => !["text", "replyingTo", "attachments", "loadAttachments"].includes(k)))
                 throw new Error("Invalid message structure");
 
             const finalMessage = {
