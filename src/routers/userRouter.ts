@@ -212,10 +212,10 @@ router.post("/login", rateLimit({
     const mfa = await MFA.findOne({ userId: user.userId });
     if (mfa) {
         if (mfa.totp.enabled && !req.body.opt?.totp)
-            return res.status(401).send({ error: "TOTP code not provided" });
+            return res.status(401).send({ error: "TOTP code wasn't provided" });
 
         if (mfa.totp.enabled && !authenticator.verify({ token: req.body.opt.totp, secret: mfa.totp.secret }))
-            return res.status(401).send({ error: "TOTP code invalid" });
+            return res.status(401).send({ error: "TOTP code is invalid" });
     }
 
     const hashedPass = pbkdf2Sync(password, Buffer.from(user.salt, "base64"), 1_000_000, 64, "sha3-512");

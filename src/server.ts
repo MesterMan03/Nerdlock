@@ -63,10 +63,7 @@ export class NerdServer {
         this.app.use(express.urlencoded({ limit: 15_000_000, extended: true }));
 
         this.app.use(compression({
-            filter: (req, res) => {
-                if (req.accepts("text/event-stream")) return false;
-                return true;
-            }
+            filter: (req, res) => req.baseUrl !== "/_nerdlock/sse"
         }));
 
         this.app.use(expressCSP.expressCspHeader({

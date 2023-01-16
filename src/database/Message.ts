@@ -31,7 +31,8 @@ export default mongoose.model("Message", new Schema<INerdMessage>({
                 required: true
             }
         }],
-        default: []
+        default: [],
+        _id: false
     },
     signature: {
         type: SchemaTypes.String,
